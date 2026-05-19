@@ -2395,24 +2395,50 @@ const ISS_FACTS = [
 
 let issIntervals = [];
 let issFactIdx = 0;
-let issOverIdx = 0;
 
-const ISS_OVER_LOCATIONS = [
-  "Pacific Ocean",
-  "North Atlantic",
-  "Indian Ocean",
-  "Sahara Desert",
-  "Amazon rainforest",
-  "Himalayas",
-  "Australia",
-  "Antarctica",
-  "Greenland",
-  "South China Sea",
-  "Andes mountains",
-  "Mediterranean Sea",
-  "Caribbean",
-  "Siberia",
+// Rough land/ocean map: rectangles in (lat, lon) degrees, checked in order.
+// First match wins, so put land masses before the ocean fallbacks.
+const ISS_REGIONS = [
+  // Polar caps
+  { lat: [78, 90],   lon: [-180, 180], name: "the Arctic Ocean" },
+  { lat: [-90, -65], lon: [-180, 180], name: "Antarctica" },
+  // Land masses
+  { lat: [60, 78],   lon: [-170, -10],  name: "northern Canada" },
+  { lat: [25, 60],   lon: [-130, -65],  name: "North America" },
+  { lat: [10, 25],   lon: [-105, -70],  name: "Central America" },
+  { lat: [-55, 12],  lon: [-82, -35],   name: "South America" },
+  { lat: [35, 71],   lon: [-12, 40],    name: "Europe" },
+  { lat: [-35, 37],  lon: [-18, 51],    name: "Africa" },
+  { lat: [10, 60],   lon: [40, 75],     name: "central Asia" },
+  { lat: [20, 55],   lon: [75, 130],    name: "Asia" },
+  { lat: [-11, 25],  lon: [92, 142],    name: "south-east Asia" },
+  { lat: [-45, -10], lon: [110, 155],   name: "Australia" },
+  { lat: [-50, -33], lon: [165, 180],   name: "New Zealand" },
+  // Ocean fallbacks
+  { lat: [-60, 65],  lon: [120, 180],   name: "the Pacific Ocean" },
+  { lat: [-60, 65],  lon: [-180, -100], name: "the Pacific Ocean" },
+  { lat: [-60, 70],  lon: [-80, -10],   name: "the Atlantic Ocean" },
+  { lat: [-50, 30],  lon: [40, 110],    name: "the Indian Ocean" },
+  { lat: [-65, -50], lon: [-180, 180],  name: "the Southern Ocean" },
 ];
+
+function issGroundLocation() {
+  if (!issSatRef || typeof earth === "undefined") return null;
+  const worldPos = new THREE.Vector3();
+  issSatRef.sat.getWorldPosition(worldPos);
+  // Position in Earth's local frame so Earth's own rotation cancels out
+  const localPos = earth.worldToLocal(worldPos.clone()).normalize();
+  const lat = (Math.asin(localPos.y) * 180) / Math.PI;
+  let lon = (Math.atan2(localPos.z, localPos.x) * 180) / Math.PI;
+  if (lon > 180) lon -= 360;
+  if (lon < -180) lon += 360;
+  for (const r of ISS_REGIONS) {
+    if (lat >= r.lat[0] && lat <= r.lat[1] && lon >= r.lon[0] && lon <= r.lon[1]) {
+      return r.name;
+    }
+  }
+  return "the ocean";
+}
 
 function startIssAnimations() {
   stopIssAnimations();
@@ -2443,19 +2469,20 @@ function startIssAnimations() {
     sunrises = sunrises >= 16 ? 0 : sunrises + 1;
     if (sunEl) sunEl.textContent = String(sunrises);
   }, 6000));
-  // Currently above: cycle every 5.5s
-  issOverIdx = Math.floor(Math.random() * ISS_OVER_LOCATIONS.length);
-  if (overEl) overEl.textContent = ISS_OVER_LOCATIONS[issOverIdx];
-  issIntervals.push(setInterval(() => {
-    issOverIdx = (issOverIdx + 1) % ISS_OVER_LOCATIONS.length;
-    if (overEl) {
+  // Currently above: read actual ground position every 700ms; only repaint
+  // when the location name changes, with a fade
+  let lastOver = null;
+  function refreshOver() {
+    if (!overEl) return;
+    const where = issGroundLocation();
+    if (where && where !== lastOver) {
+      lastOver = where;
       overEl.style.opacity = "0";
-      setTimeout(() => {
-        overEl.textContent = ISS_OVER_LOCATIONS[issOverIdx];
-        overEl.style.opacity = "1";
-      }, 200);
+      setTimeout(() => { overEl.textContent = where; overEl.style.opacity = "1"; }, 180);
     }
-  }, 5500));
+  }
+  refreshOver();
+  issIntervals.push(setInterval(refreshOver, 700));
   // Next sunrise countdown: 45 -> 0 -> 45, tick every 1.5s (compressed)
   let nextMin = 45;
   if (nextEl) nextEl.textContent = "45";
