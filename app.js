@@ -4805,9 +4805,6 @@ let showIntro = () => {};
 // ===== Sequential planet tour =====
 const tour = (function () {
   const bar = document.getElementById("tour-bar");
-  const countEl = document.getElementById("tour-count");
-  const nameEl = document.getElementById("tour-name");
-  const nextLabel = document.getElementById("tour-next-label");
   const prevBtn = document.getElementById("tour-prev");
   const nextBtn = document.getElementById("tour-next");
   const exitBtn = document.getElementById("tour-exit");
@@ -4828,10 +4825,8 @@ const tour = (function () {
 
   function render() {
     if (!state.active) return;
-    countEl.textContent = `Stop ${state.idx + 1} of ${TOUR_LIST.length}`;
-    nameEl.textContent = TOUR_LIST[state.idx].name;
     prevBtn.disabled = state.idx === 0;
-    nextLabel.textContent = state.idx === TOUR_LIST.length - 1 ? "Finish" : "Next";
+    nextBtn.disabled = state.idx === TOUR_LIST.length - 1;
   }
 
   function goToCurrent() {
