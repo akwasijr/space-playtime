@@ -1095,6 +1095,7 @@ function makeSatellite() {
 }
 
 const satellites = [];
+let issSatRef = null;
 const satConfigs = [
   { name: "ISS", alt: 2.85, incl: 0.91, speed: 0.65, phase: 0.0 },
   { name: "Hubble", alt: 2.9, incl: 0.5, speed: 0.55, phase: 1.4 },
@@ -1111,7 +1112,9 @@ for (const cfg of satConfigs) {
   const sat = makeSatellite();
   sat.position.set(cfg.alt, 0, 0);
   pivot.add(sat);
-  satellites.push({ pivot, sat, speed: cfg.speed });
+  const entry = { pivot, sat, speed: cfg.speed, name: cfg.name };
+  satellites.push(entry);
+  if (cfg.name === "ISS") issSatRef = entry;
 }
 
 // --- Rocket launch ---
@@ -2371,6 +2374,58 @@ function flyToGalaxyView() {
   setTimeout(() => { camTween.dur = 1.2; }, 1700);
 }
 
+// --- Astronaut view from the ISS ---
+let issMode = false;
+function enterIssMode() {
+  if (issMode) return;
+  if (!issSatRef) return;
+  if (typeof tour !== "undefined" && tour && tour.active) tour.exit();
+  if (typeof exitGalaxyMode === "function") exitGalaxyMode();
+  if (typeof hideHotspots === "function") hideHotspots();
+  if (typeof infoToggle !== "undefined" && infoToggle) infoToggle.hidden = true;
+  if (typeof infoPanel !== "undefined" && infoPanel) infoPanel.hidden = true;
+  if (typeof launchBtn !== "undefined" && launchBtn) launchBtn.hidden = true;
+  const secPop = document.getElementById("section-pop");
+  if (secPop) secPop.hidden = true;
+  exitFeedMode();
+  followObj = null;
+  camTween.active = false;
+  controls.enabled = false;
+  // Force the Earth-orbital scene to render even from far away
+  earthOrbital.visible = true;
+  issMode = true;
+  const hud = document.getElementById("iss-hud");
+  const exit = document.getElementById("iss-exit");
+  if (hud) hud.hidden = false;
+  if (exit) exit.hidden = false;
+  // Hide hint, top-bar, minimap while inside the station
+  document.body.classList.add("iss-mode");
+  showCaption("Astronaut view, looking out from the International Space Station.");
+}
+
+function exitIssMode() {
+  if (!issMode) return;
+  issMode = false;
+  const hud = document.getElementById("iss-hud");
+  const exit = document.getElementById("iss-exit");
+  if (hud) hud.hidden = true;
+  if (exit) exit.hidden = true;
+  document.body.classList.remove("iss-mode");
+  // Fly back to a nice Earth-view position
+  const earthPos = new THREE.Vector3();
+  earth.getWorldPosition(earthPos);
+  const back = new THREE.Vector3(0, 6, 18).add(earthPos);
+  camTween.fromPos.copy(camera.position);
+  camTween.toPos.copy(back);
+  camTween.fromTarget.copy(controls.target);
+  camTween.toTarget.copy(earthPos);
+  camTween.t = 0;
+  camTween.dur = 1.0;
+  camTween.active = true;
+  camTween.followObj = null;
+  showCaption("Back to space.");
+}
+
 // --- caption + state ---
 let zoomedOn = null;
 let feedMode = false;
@@ -2539,13 +2594,25 @@ function animate() {
   earth.getWorldPosition(earthWorld);
   const dEarth = camera.position.distanceTo(earthWorld);
   const earthCloseUp = dEarth < 30;
-  earthOrbital.visible = earthCloseUp;
-  if (earthCloseUp) {
+  earthOrbital.visible = earthCloseUp || issMode;
+  if (earthCloseUp || issMode) {
     for (const s of satellites) s.pivot.rotation.y += dt * s.speed;
-    updateRocket(dt);
+    if (earthCloseUp) updateRocket(dt);
+  }
+  // Astronaut view: snap camera to the ISS each frame, look back at Earth
+  if (issMode && issSatRef) {
+    const issPos = new THREE.Vector3();
+    issSatRef.sat.getWorldPosition(issPos);
+    // Offset camera slightly outward (away from Earth) so we feel like we're
+    // looking out a window, not stuck inside the bus
+    const outward = new THREE.Vector3().subVectors(issPos, earthWorld).normalize();
+    const camPos = issPos.clone().add(outward.multiplyScalar(0.35));
+    camera.position.copy(camPos);
+    controls.target.copy(earthWorld);
+    camera.lookAt(earthWorld);
   }
   // Show / hide launch button when zoomed on Earth
-  if (zoomedOn === earth && earthCloseUp) {
+  if (zoomedOn === earth && earthCloseUp && !issMode) {
     if (launchBtn.hidden) launchBtn.hidden = false;
   } else if (!launchBtn.hidden) {
     launchBtn.hidden = true;
@@ -4912,6 +4979,33 @@ pickObject = function (obj) {
   // Don't let clicks on the info panel close the galaxy view
   const ip = document.getElementById("info-panel");
   if (ip) ip.addEventListener("pointerdown", (e) => e.stopPropagation());
+})();
+
+// Astronaut / ISS view buttons
+(function wireIss() {
+  const enter = document.getElementById("iss-btn");
+  const exit = document.getElementById("iss-exit");
+  if (enter) {
+    enter.addEventListener("click", (e) => { e.stopPropagation(); enterIssMode(); });
+    enter.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+  if (exit) {
+    exit.addEventListener("click", (e) => { e.stopPropagation(); exitIssMode(); });
+    exit.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+})();
+
+// Wrap pickObject again so clicking a planet from ISS view exits the station first
+const _pickBeforeIss = pickObject;
+pickObject = function (obj) {
+  if (issMode) exitIssMode();
+  return _pickBeforeIss(obj);
+};
+
+// Home button should also exit ISS mode
+(function wireHomeIssExit() {
+  const home = document.getElementById("home-btn");
+  if (home) home.addEventListener("click", () => { if (issMode) exitIssMode(); }, true);
 })();
 
 // Re-wire the "Visit every planet" mission card to start the tour
