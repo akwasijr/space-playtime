@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Space</title>
+<link rel="stylesheet" href="styles.css?v=20" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+  <canvas id="scene"></canvas>
+
+  <!-- Mission cards intro (auto-removes after the animation) -->
+  <div id="mission-intro" class="mission-intro" aria-hidden="true">
+    <div class="mission-stage">
+      <div class="mission-cards">
+        <div class="mission-card mc-1" data-action="planet">
+          <div class="mc-art">
+            <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+              <defs>
+                <radialGradient id="planet-fill" cx="38%" cy="35%" r="70%">
+                  <stop offset="0%" stop-color="#ffd28a"/>
+                  <stop offset="55%" stop-color="#e07a3a"/>
+                  <stop offset="100%" stop-color="#3a0f06"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="60" cy="62" rx="52" ry="9" fill="none" stroke="#d8b88a" stroke-width="2.4" opacity="0.9"/>
+              <ellipse cx="60" cy="62" rx="52" ry="9" fill="none" stroke="#5a4828" stroke-width="0.8" opacity="0.9"/>
+              <circle cx="60" cy="60" r="34" fill="url(#planet-fill)"/>
+              <ellipse cx="60" cy="62" rx="52" ry="9" fill="none" stroke="#d8b88a" stroke-width="2.4" opacity="0.9" clip-path="inset(50% 0 0 0)"/>
+            </svg>
+          </div>
+          <div class="mc-text">Visit every planet</div>
+        </div>
+
+        <div class="mission-card mc-2" data-action="moon">
+          <div class="mc-art">
+            <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+              <defs>
+                <radialGradient id="moon-fill" cx="35%" cy="32%" r="72%">
+                  <stop offset="0%" stop-color="#f4f1e8"/>
+                  <stop offset="55%" stop-color="#bbb4a3"/>
+                  <stop offset="100%" stop-color="#1d1a14"/>
+                </radialGradient>
+              </defs>
+              <circle cx="60" cy="60" r="38" fill="url(#moon-fill)"/>
+              <circle cx="48" cy="50" r="5"  fill="#7d7666" opacity="0.55"/>
+              <circle cx="70" cy="58" r="3.5" fill="#6f6857" opacity="0.55"/>
+              <circle cx="55" cy="74" r="4"  fill="#6f6857" opacity="0.55"/>
+              <circle cx="76" cy="72" r="2.5" fill="#5a5345" opacity="0.55"/>
+              <circle cx="42" cy="66" r="2"  fill="#5a5345" opacity="0.55"/>
+            </svg>
+          </div>
+          <div class="mc-text">Find a moon</div>
+        </div>
+
+        <div class="mission-card mc-3" data-action="blackhole">
+          <div class="mc-art">
+            <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+              <defs>
+                <radialGradient id="disc-fill" cx="50%" cy="50%" r="55%">
+                  <stop offset="40%" stop-color="rgba(0,0,0,0)"/>
+                  <stop offset="55%" stop-color="#ffe4a8"/>
+                  <stop offset="72%" stop-color="#ff7a2a"/>
+                  <stop offset="100%" stop-color="rgba(60,15,0,0)"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="60" cy="62" rx="50" ry="14" fill="url(#disc-fill)"/>
+              <circle cx="60" cy="60" r="22" fill="#000"/>
+              <circle cx="60" cy="60" r="24" fill="none" stroke="#ffd9a0" stroke-width="1.4" opacity="0.85"/>
+              <ellipse cx="60" cy="62" rx="50" ry="14" fill="url(#disc-fill)" clip-path="inset(50% 0 0 0)"/>
+            </svg>
+          </div>
+          <div class="mc-text">Don't fall in the black hole</div>
+        </div>
+
+        <div class="mission-card mc-4" data-action="quiz">
+          <div class="mc-art">
+            <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+              <defs>
+                <radialGradient id="quiz-fill" cx="35%" cy="32%" r="72%">
+                  <stop offset="0%" stop-color="#ffe8a8"/>
+                  <stop offset="55%" stop-color="#f0a830"/>
+                  <stop offset="100%" stop-color="#3a1f00"/>
+                </radialGradient>
+              </defs>
+              <circle cx="60" cy="60" r="40" fill="url(#quiz-fill)"/>
+              <text x="60" y="78" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="56" font-weight="700" fill="#1a0f00">?</text>
+            </svg>
+          </div>
+          <div class="mc-text">Take a space quiz</div>
+        </div>
+      </div>
+      <p class="mission-hint" hidden></p>
+      <button id="mission-go" class="mission-go" type="button">
+        <span>Let's explore!</span>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3 8 L 13 8 M 9 4 L 13 8 L 9 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <span class="sparkle s1"></span>
+    <span class="sparkle s2"></span>
+    <span class="sparkle s3"></span>
+    <span class="sparkle s4"></span>
+    <span class="sparkle s5"></span>
+    <span class="sparkle s6"></span>
+  </div>
+
+  <div id="hover-label" aria-hidden="true"></div>
+
+  <div id="caption" class="caption" aria-live="polite"></div>
+
+  <button id="back" class="back" type="button" hidden>← back</button>
+
+  <!-- Interactive hotspots around the focused body -->
+  <div id="hotspots" class="hotspots" hidden aria-hidden="true">
+    <button class="hot hot-about" type="button" data-section="about" aria-label="About">
+      <span class="hot-icon"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2.5 3 H 7 a1.5 1.5 0 0 1 1.5 1.5 V 13 a1 1 0 0 0-1-1 H 2.5 Z M 13.5 3 H 9 A 1.5 1.5 0 0 0 7.5 4.5 V 13 a 1 1 0 0 1 1-1 H 13.5 Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span><span class="hot-label">About</span>
+    </button>
+    <button class="hot hot-facts" type="button" data-section="facts" aria-label="Wow facts">
+      <span class="hot-icon"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.5 L9.4 5.6 L13.7 5.9 L10.4 8.7 L11.5 13 L8 10.7 L4.5 13 L5.6 8.7 L2.3 5.9 L6.6 5.6 Z" fill="currentColor"/></svg></span><span class="hot-label">Wow facts</span>
+    </button>
+    <button class="hot hot-stats" type="button" data-section="stats" aria-label="By the numbers">
+      <span class="hot-icon"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="9" width="2.6" height="5" fill="currentColor"/><rect x="6.7" y="6" width="2.6" height="8" fill="currentColor"/><rect x="11.4" y="3" width="2.6" height="11" fill="currentColor"/></svg></span><span class="hot-label">Numbers</span>
+    </button>
+  </div>
+
+  <!-- Floating section popup -->
+  <div id="section-pop" class="section-pop" hidden>
+    <button id="section-pop-close" class="section-pop-close" type="button" aria-label="Close">×</button>
+    <h3 id="section-pop-title"></h3>
+    <div id="section-pop-body"></div>
+  </div>
+
+  <div id="hint" class="hint">drag to look · scroll to zoom · right-drag (or shift+drag) to pan · click anything</div>
+
+  <div class="top-bar">
+    <div class="search">
+      <button id="search-toggle" class="top-btn primary" type="button" aria-label="Find an object" aria-expanded="false">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M10.5 10.5 L 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <span>Find</span>
+      </button>
+      <div id="search-panel" class="search-panel" hidden>
+        <div class="search-head">
+          <input id="search-input" type="text" placeholder="search…" autocomplete="off" spellcheck="false" />
+          <button id="search-close" type="button" aria-label="Close">×</button>
+        </div>
+        <div id="search-results" class="search-results" role="listbox"></div>
+      </div>
+    </div>
+    <button id="home-btn" class="top-btn" type="button" aria-label="Go home">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path d="M2.5 8 L 8 3 L 13.5 8 L 13.5 13 L 10 13 L 10 9.5 L 6 9.5 L 6 13 L 2.5 13 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      <span>Home</span>
+    </button>
+  </div>
+
+  <button id="info-toggle" class="info-toggle" type="button" aria-label="More about this object" hidden>i</button>
+
+  <!-- Quiz overlay -->
+  <div id="quiz-overlay" class="quiz-overlay" hidden>
+    <div class="quiz-card" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
+      <header class="quiz-head">
+        <h3 id="quiz-title">Quiz</h3>
+        <button id="quiz-close" type="button" aria-label="Close quiz">×</button>
+      </header>
+      <div class="quiz-progress"><div id="quiz-progress-fill"></div></div>
+      <div id="quiz-body"></div>
+    </div>
+  </div>
+
+  <button id="launch-btn" class="launch-btn" type="button" hidden>
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <path d="M8 1.5 C 5.5 4 4.5 6.5 4.5 9 L 4.5 11 L 6 11 L 6 12.5 L 4 14 L 5 14.5 L 6 13.8 L 6.6 14.5 L 8 13.5 L 9.4 14.5 L 10 13.8 L 11 14.5 L 12 14 L 10 12.5 L 10 11 L 11.5 11 L 11.5 9 C 11.5 6.5 10.5 4 8 1.5 Z M 8 6.2 a 1.1 1.1 0 1 0 0 2.2 a 1.1 1.1 0 1 0 0 -2.2 Z" fill="currentColor"/>
+    </svg>
+    Launch rocket
+  </button>
+
+  <aside id="info-panel" class="info-panel" hidden aria-labelledby="info-title">
+    <div class="info-header">
+      <h2 id="info-title"></h2>
+      <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="info-panel-inner">
+      <div id="info-body"></div>
+    </div>
+  </aside>
+
+  <div class="zoom-controls" aria-label="View controls">
+    <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+    <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+    <button id="recenter" type="button" aria-label="Recenter on the Sun">⌖</button>
+  </div>
+
+  <div id="minimap" class="minimap" aria-label="Solar system map">
+    <svg id="minimap-svg" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg">
+      <g id="minimap-orbits"></g>
+      <g id="minimap-dots"></g>
+    </svg>
+  </div>
+
+  <script type="module" src="app.js?v=20"></script>
+</body>
+</html>
