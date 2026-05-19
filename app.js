@@ -73,7 +73,7 @@ const LensShader = {
  void main() {
  vec2 frag = vUv * uResolution;
  vec2 bhPx = (uBH * 0.5 + 0.5) * uResolution;
- vec2 d = frag, bhPx;
+ vec2 d = frag - bhPx;
  float dist = length(d);
 
  if (uActive < 0.5 || uHorizonPx < 1.0) {
@@ -92,9 +92,9 @@ const LensShader = {
 
  // Lensing zone
  if (dist < influence) {
- float t = (dist, horizon) / (influence, horizon);
+ float t = (dist - horizon) / (influence - horizon);
  // Stronger bend close to the horizon, falls off outward
- float bend = pow(1.0, t, 2.6) * horizon * 3.5;
+ float bend = pow(1.0 - t, 2.6) * horizon * 3.5;
  vec2 dir = d / dist;
  vec2 newPx = frag + dir * bend;
  vec2 newUv = clamp(newPx / uResolution, 0.0, 1.0);
@@ -104,13 +104,13 @@ const LensShader = {
  vec3 col;
  col.r = texture2D(tDiffuse, clamp((newPx + dir * chroma) / uResolution, 0.0, 1.0)).r;
  col.g = texture2D(tDiffuse, newUv).g;
- col.b = texture2D(tDiffuse, clamp((newPx, dir * chroma) / uResolution, 0.0, 1.0)).b;
+ col.b = texture2D(tDiffuse, clamp((newPx - dir * chroma) / uResolution, 0.0, 1.0)).b;
 
  // Einstein ring: bright halo just outside horizon
  float ringInner = horizon * 1.00;
  float ringPeak = horizon * 1.10;
  float ringOuter = horizon * 1.45;
- float ring = smoothstep(ringInner, ringPeak, dist) * (1.0, smoothstep(ringPeak, ringOuter, dist));
+ float ring = smoothstep(ringInner, ringPeak, dist) * (1.0 - smoothstep(ringPeak, ringOuter, dist));
  col += vec3(1.0, 0.78, 0.45) * ring * 1.4;
 
  gl_FragColor = vec4(col, 1.0);
