@@ -1027,7 +1027,8 @@ const asteroidBelt = makeBelt({
   color: 0x9c8a6e,
   size: 0.55,
 });
-scene.add(asteroidBelt);
+asteroidBelt.visible = false;
+// Asteroid-belt debris hidden, it looked like noisy junk floating across the scene
 
 const kuiperBelt = makeBelt({
   innerR: 460,
