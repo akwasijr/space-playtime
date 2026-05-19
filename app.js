@@ -2071,17 +2071,6 @@ canvas.addEventListener("pointerup", (e) => {
   pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-  if (feedMode) {
-    raycaster.setFromCamera(pointer, camera);
-    const bhWorld = new THREE.Vector3();
-    blackHole.getWorldPosition(bhWorld);
-    const aim = raycaster.ray.origin
-      .clone()
-      .add(raycaster.ray.direction.clone().multiplyScalar(45));
-    spawnMatter(aim, bhWorld);
-    return;
-  }
-
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(clickables, false);
   if (hits.length > 0) {

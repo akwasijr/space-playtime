@@ -434,8 +434,8 @@ body.pointing { cursor: pointer; }
   z-index: 8;
   overflow-y: auto;
   overscroll-behavior: contain;
-  transform: translateX(0);
-  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms ease;
+  transform: translateX(0) scale(1);
+  transition: transform 440ms cubic-bezier(0.22, 1.18, 0.36, 1), opacity 260ms ease;
   opacity: 1;
   border-left: none;
   border-radius: 14px;
@@ -443,9 +443,39 @@ body.pointing { cursor: pointer; }
 }
 .info-panel[hidden] {
   display: block !important;
-  transform: translateX(calc(100% + 32px));
+  transform: translateX(calc(100% + 32px)) scale(0.96);
   opacity: 0;
   pointer-events: none;
+}
+
+/* Staggered entrance for the inner content */
+@keyframes infoChildIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#info-body > * {
+  opacity: 0;
+  animation: infoChildIn 460ms cubic-bezier(0.22, 1.05, 0.36, 1) forwards;
+}
+#info-body > *:nth-child(1) { animation-delay:  80ms; }
+#info-body > *:nth-child(2) { animation-delay: 130ms; }
+#info-body > *:nth-child(3) { animation-delay: 180ms; }
+#info-body > *:nth-child(4) { animation-delay: 220ms; }
+#info-body > *:nth-child(5) { animation-delay: 260ms; }
+#info-body > *:nth-child(6) { animation-delay: 300ms; }
+#info-body > *:nth-child(7) { animation-delay: 340ms; }
+#info-body > *:nth-child(8) { animation-delay: 380ms; }
+#info-body > *:nth-child(n+9) { animation-delay: 420ms; }
+
+/* The Explore CTA gets a tiny extra pop on entrance */
+@keyframes ctaPop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.94); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+#info-body .info-actions {
+  animation: ctaPop 520ms cubic-bezier(0.34, 1.45, 0.5, 1) both;
+  animation-delay: 320ms;
 }
 .info-panel-inner {
   padding: 18px 28px 84px;
@@ -1026,7 +1056,7 @@ body.pointing { cursor: pointer; }
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: popIn 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: popIn 360ms cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .section-pop[hidden] { display: none; }
 .section-pop .sp-header {
@@ -1101,8 +1131,28 @@ body.pointing { cursor: pointer; }
   display: block;
 }
 @keyframes popIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateY(14px) scale(0.94); }
+  60%  { opacity: 1; transform: translateY(-3px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Respect reduced-motion preferences across all panel/popup animations */
+@media (prefers-reduced-motion: reduce) {
+  .info-panel,
+  .info-panel[hidden],
+  #info-body > *,
+  #info-body .info-actions,
+  .section-pop,
+  .hot,
+  .fact-item,
+  .stat-row,
+  .layer-item,
+  #layer-highlight {
+    animation: none !important;
+    transition: opacity 160ms ease !important;
+    transform: none !important;
+  }
+  .info-panel[hidden] { opacity: 0; }
 }
 
 /* ---------- Wow facts: plain numbered list ---------- */
