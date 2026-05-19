@@ -216,6 +216,96 @@ const roundPointTex = makeRoundPointTexture();
   scene.add(new THREE.Points(geo, mat));
 })();
 
+// --- Milky Way band: denser stars clustered along the galactic plane ---
+(function makeMilkyWayBand() {
+  // Tilt the galactic plane so it looks like a real band crossing the sky
+  const tilt = new THREE.Matrix4().makeRotationFromEuler(
+    new THREE.Euler(0.62, 0.4, -0.18),
+  );
+
+  // Dense bright stars near the band
+  const count = 8000;
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const v = new THREE.Vector3();
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    // Bias latitude toward 0 (cluster near galactic equator)
+    const lat = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.35;
+    const r = 1800 + Math.random() * 400;
+    v.set(
+      r * Math.cos(lat) * Math.cos(theta),
+      r * Math.sin(lat),
+      r * Math.cos(lat) * Math.sin(theta),
+    );
+    v.applyMatrix4(tilt);
+    positions[i * 3] = v.x;
+    positions[i * 3 + 1] = v.y;
+    positions[i * 3 + 2] = v.z;
+    // Warm-tinted dust + bluer hot stars mix
+    const warm = Math.random() < 0.55;
+    const b = 0.55 + Math.random() * 0.45;
+    if (warm) {
+      colors[i * 3]     = Math.min(1, b + 0.18);
+      colors[i * 3 + 1] = b * 0.92;
+      colors[i * 3 + 2] = b * 0.78;
+    } else {
+      colors[i * 3]     = b * 0.85;
+      colors[i * 3 + 1] = b * 0.92;
+      colors[i * 3 + 2] = Math.min(1, b + 0.15);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 1.6,
+    vertexColors: true,
+    sizeAttenuation: false,
+    transparent: true,
+    opacity: 0.85,
+    map: roundPointTex,
+    alphaTest: 0.05,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  scene.add(new THREE.Points(geo, mat));
+
+  // Soft glowing dust haze: a few thousand very faint points across a thicker band
+  const haze = 4500;
+  const hp = new THREE.Float32BufferAttribute(haze * 3, 3);
+  const hc = new THREE.Float32BufferAttribute(haze * 3, 3);
+  for (let i = 0; i < haze; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const lat = (Math.random() - 0.5) * 0.5;
+    const r = 1900 + Math.random() * 350;
+    v.set(
+      r * Math.cos(lat) * Math.cos(theta),
+      r * Math.sin(lat),
+      r * Math.cos(lat) * Math.sin(theta),
+    );
+    v.applyMatrix4(tilt);
+    hp.setXYZ(i, v.x, v.y, v.z);
+    const t = 0.18 + Math.random() * 0.22;
+    hc.setXYZ(i, t * 1.05, t * 0.88, t * 0.7);
+  }
+  const hazeGeo = new THREE.BufferGeometry();
+  hazeGeo.setAttribute("position", hp);
+  hazeGeo.setAttribute("color", hc);
+  const hazeMat = new THREE.PointsMaterial({
+    size: 4.5,
+    vertexColors: true,
+    sizeAttenuation: false,
+    transparent: true,
+    opacity: 0.55,
+    map: roundPointTex,
+    alphaTest: 0.02,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  scene.add(new THREE.Points(hazeGeo, hazeMat));
+})();
+
 scene.add(new THREE.AmbientLight(0x223355, 0.12));
 
 // --- Sun ---
@@ -2021,6 +2111,7 @@ const homePos = camera.position.clone();
 const homeTarget = new THREE.Vector3(0, 0, 0);
 
 function flyHome() {
+  if (typeof tour !== "undefined" && tour && tour.active) tour.exit();
   camTween.fromPos.copy(camera.position);
   camTween.toPos.copy(homePos);
   camTween.fromTarget.copy(controls.target);
@@ -2033,6 +2124,31 @@ function flyHome() {
   exitFeedMode();
   hideCaption();
   backBtn.hidden = true;
+}
+
+// ---- Galaxy view: pull the camera way out so the solar system sits inside the Milky Way ----
+const galaxyPos = new THREE.Vector3(280, 620, 1180);
+const galaxyTarget = new THREE.Vector3(0, 0, 0);
+function flyToGalaxyView() {
+  if (typeof tour !== "undefined" && tour && tour.active) tour.exit();
+  zoomedOn = null;
+  if (typeof infoToggle !== "undefined") infoToggle.hidden = true;
+  if (typeof infoPanel !== "undefined") infoPanel.hidden = true;
+  if (typeof hideHotspots === "function") hideHotspots();
+  camTween.fromPos.copy(camera.position);
+  camTween.toPos.copy(galaxyPos);
+  camTween.fromTarget.copy(controls.target);
+  camTween.toTarget.copy(galaxyTarget);
+  camTween.t = 0;
+  camTween.dur = 1.8;
+  camTween.active = true;
+  camTween.followObj = null;
+  followObj = null;
+  controls.enabled = false;
+  exitFeedMode();
+  showCaption("Galaxy view — the solar system inside the Milky Way");
+  backBtn.hidden = false;
+  setTimeout(() => { camTween.dur = 1.2; }, 1900);
 }
 
 // --- caption + state ---
@@ -4450,3 +4566,121 @@ let showIntro = () => {};
     if (fresh) setupIntro(fresh);
   };
 }
+
+// ===== Sequential planet tour =====
+const tour = (function () {
+  const bar = document.getElementById("tour-bar");
+  const countEl = document.getElementById("tour-count");
+  const nameEl = document.getElementById("tour-name");
+  const nextLabel = document.getElementById("tour-next-label");
+  const prevBtn = document.getElementById("tour-prev");
+  const nextBtn = document.getElementById("tour-next");
+  const exitBtn = document.getElementById("tour-exit");
+
+  const TOUR_LIST = [
+    { name: "Sun",     obj: () => sun },
+    { name: "Mercury", obj: () => mercury },
+    { name: "Venus",   obj: () => venus },
+    { name: "Earth",   obj: () => earth },
+    { name: "Mars",    obj: () => mars },
+    { name: "Jupiter", obj: () => jupiter },
+    { name: "Saturn",  obj: () => saturn },
+    { name: "Uranus",  obj: () => uranus },
+    { name: "Neptune", obj: () => neptune },
+  ];
+
+  const state = { active: false, idx: 0, suppressExit: false };
+
+  function render() {
+    if (!state.active) return;
+    countEl.textContent = `Stop ${state.idx + 1} of ${TOUR_LIST.length}`;
+    nameEl.textContent = TOUR_LIST[state.idx].name;
+    prevBtn.disabled = state.idx === 0;
+    nextLabel.textContent = state.idx === TOUR_LIST.length - 1 ? "Finish" : "Next";
+  }
+
+  function goToCurrent() {
+    const entry = TOUR_LIST[state.idx];
+    const obj = entry.obj();
+    if (!obj) return;
+    state.suppressExit = true;
+    pickObject(obj);
+    setTimeout(() => { state.suppressExit = false; }, 50);
+    render();
+  }
+
+  function start(idx) {
+    state.active = true;
+    state.idx = Math.max(0, Math.min(TOUR_LIST.length - 1, idx || 0));
+    bar.hidden = false;
+    goToCurrent();
+  }
+
+  function next() {
+    if (state.idx >= TOUR_LIST.length - 1) {
+      exit();
+      flyHome();
+      return;
+    }
+    state.idx += 1;
+    goToCurrent();
+  }
+
+  function prev() {
+    if (state.idx <= 0) return;
+    state.idx -= 1;
+    goToCurrent();
+  }
+
+  function exit() {
+    if (!state.active) return;
+    state.active = false;
+    bar.hidden = true;
+  }
+
+  prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prev(); });
+  nextBtn.addEventListener("click", (e) => { e.stopPropagation(); next(); });
+  exitBtn.addEventListener("click", (e) => { e.stopPropagation(); exit(); flyHome(); });
+
+  return {
+    get active() { return state.active; },
+    get suppressExit() { return state.suppressExit; },
+    start, next, prev, exit,
+  };
+})();
+
+// Auto-exit tour if the user navigates somewhere outside the planned sequence
+const _origPickObject = pickObject;
+pickObject = function (obj) {
+  if (tour.active && !tour.suppressExit) tour.exit();
+  return _origPickObject(obj);
+};
+
+// Galaxy view button
+(function wireGalaxy() {
+  const btn = document.getElementById("galaxy-btn");
+  if (!btn) return;
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    flyToGalaxyView();
+  });
+})();
+
+// Re-wire the "Visit every planet" mission card to start the tour
+// (document-level capture so it survives showIntro() recreating the cards)
+document.addEventListener(
+  "click",
+  (e) => {
+    const card = e.target.closest && e.target.closest('.mission-card[data-action="planet"]');
+    if (!card) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    const intro = document.getElementById("mission-intro");
+    if (intro) {
+      intro.classList.add("dismissed");
+      setTimeout(() => intro.remove(), 650);
+    }
+    tour.start(0);
+  },
+  true,
+);

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Space</title>
-<link rel="stylesheet" href="styles.css?v=24" />
+<link rel="stylesheet" href="styles.css?v=25" />
 <script type="importmap">
 {
   "imports": {
@@ -169,6 +169,32 @@
       </svg>
       <span>Home</span>
     </button>
+    <button id="galaxy-btn" class="top-btn" type="button" aria-label="Galaxy view">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <ellipse cx="8" cy="8" rx="6.4" ry="2.2" fill="none" stroke="currentColor" stroke-width="1.4" transform="rotate(-22 8 8)"/>
+        <circle cx="8" cy="8" r="1.2" fill="currentColor"/>
+      </svg>
+      <span>Galaxy</span>
+    </button>
+  </div>
+
+  <div id="tour-bar" class="tour-bar" hidden aria-live="polite">
+    <button id="tour-prev" class="tour-step-btn" type="button" aria-label="Previous planet">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M10 3 L 5 8 L 10 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="tour-meta">
+      <div class="tour-count" id="tour-count">Stop 1 of 9</div>
+      <div class="tour-name" id="tour-name">Sun</div>
+    </div>
+    <button id="tour-next" class="tour-step-btn primary" type="button" aria-label="Next planet">
+      <span id="tour-next-label">Next</span>
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M6 3 L 11 8 L 6 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button id="tour-exit" class="tour-exit" type="button" aria-label="End tour">×</button>
   </div>
 
   <button id="info-toggle" class="info-toggle" type="button" aria-label="More about this object" hidden>i</button>
@@ -215,6 +241,6 @@
     </svg>
   </div>
 
-  <script type="module" src="app.js?v=24"></script>
+  <script type="module" src="app.js?v=25"></script>
 </body>
 </html>

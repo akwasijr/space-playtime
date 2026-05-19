@@ -1437,3 +1437,106 @@ body.pointing { cursor: pointer; }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+
+/* ---------- Sequential planet tour bar ---------- */
+.tour-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 10px;
+  background: rgba(14, 16, 30, 0.88);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 13px;
+  animation: tourIn 420ms cubic-bezier(0.22, 1.2, 0.36, 1);
+  max-width: calc(100vw - 32px);
+}
+.tour-bar[hidden] { display: none; }
+@keyframes tourIn {
+  from { opacity: 0; transform: translate(-50%, 14px) scale(0.94); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+.tour-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  min-width: 96px;
+  padding: 0 6px;
+}
+.tour-count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+.tour-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 1px;
+}
+.tour-step-btn {
+  appearance: none;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 140ms ease, transform 120ms ease;
+}
+.tour-step-btn:hover { background: rgba(255,255,255,0.16); }
+.tour-step-btn:active { transform: translateY(1px); }
+.tour-step-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.tour-step-btn.primary {
+  background: #ffd166;
+  color: #1a1a2e;
+  padding: 8px 14px;
+}
+.tour-step-btn.primary:hover { background: #ffdc8a; }
+.tour-step-btn:focus-visible {
+  outline: 2px solid #ffd166;
+  outline-offset: 2px;
+}
+.tour-step-btn.primary:focus-visible {
+  outline-color: #fff;
+}
+.tour-exit {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 18px;
+  line-height: 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+.tour-exit:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.tour-exit:focus-visible {
+  outline: 2px solid #ffd166;
+  outline-offset: 2px;
+}
