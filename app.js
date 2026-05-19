@@ -3521,17 +3521,19 @@ function openInfo() {
       const entries = Object.entries(data.stats).slice(0, 3);
       html += `<div class="quick-stats">`;
       for (const [k, v] of entries) {
-        html += `<div class="qs"><div class="qs-v">${v}</div><div class="qs-k">${k}</div></div>`;
+        html += `<div class="qs"><div class="qs-k">${k}</div><div class="qs-v">${v}</div></div>`;
       }
       html += `</div>`;
     }
+    html += `<div class="info-actions">`;
     html += `<button type="button" class="explore-btn" id="explore-cta">Explore ${name}</button>`;
     html += `<div class="info-hint">Press the pills around ${name} to dig in.</div>`;
+    html += `</div>`;
   } else {
     html = zoomedOn.userData.details || "";
   }
   if (QUIZZES[name]) {
-    html += `<button type="button" class="quiz-launch" data-quiz="${name}">Take the ${name} quiz →</button>`;
+    html += `<button type="button" class="quiz-launch" data-quiz="${name}">Take the ${name} quiz <span aria-hidden="true">→</span></button>`;
   }
   infoBody.innerHTML = html;
   const quizBtn = infoBody.querySelector(".quiz-launch");
