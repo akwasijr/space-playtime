@@ -3717,34 +3717,90 @@ function renderQuizSplash() {
   if (!s) return;
   quizProgressFill.style.width = "0%";
   const total = s.questions.length;
-  const letter = (s.name || "?").charAt(0).toUpperCase();
+  const palette = QUIZ_PALETTE[s.name] || QUIZ_PALETTE.default;
   quizBody.innerHTML = `
  <div class="quiz-splash">
- <div class="quiz-splash-badge" aria-hidden="true">
- <span class="quiz-splash-glyph">${letter}</span>
- <span class="quiz-splash-orbit"></span>
- <span class="quiz-splash-orbit quiz-splash-orbit-2"></span>
+ <div class="quiz-scene" aria-hidden="true" style="--p1:${palette.p1};--p2:${palette.p2};--p3:${palette.p3};--accent:${palette.accent};">
+ <span class="qs-star qs-star-1"></span>
+ <span class="qs-star qs-star-2"></span>
+ <span class="qs-star qs-star-3"></span>
+ <span class="qs-star qs-star-4"></span>
+ <span class="qs-star qs-star-5"></span>
+ <span class="qs-star qs-star-6"></span>
+ <span class="qs-planet"></span>
+ <span class="qs-ring"></span>
+ <span class="qs-rocket">
+ <svg viewBox="0 0 32 64" width="34" height="64" aria-hidden="true">
+ <path d="M16 2 C 11 10 8 18 8 28 L 8 44 L 24 44 L 24 28 C 24 18 21 10 16 2 Z" fill="#f4f4f8" stroke="#c0c4d6" stroke-width="1"/>
+ <circle cx="16" cy="22" r="3.4" fill="#7adfff" stroke="#1a3a6b" stroke-width="0.8"/>
+ <path d="M8 38 L 4 48 L 8 44 Z M 24 38 L 28 48 L 24 44 Z" fill="#d94848"/>
+ <path d="M11 44 L 11 50 L 16 56 L 21 50 L 21 44 Z" fill="#ffb650"/>
+ <path d="M13 50 L 16 60 L 19 50 Z" fill="#fff3c2"/>
+ </svg>
+ <span class="qs-flame"></span>
+ </span>
  </div>
  <h4 class="quiz-splash-title">${s.name} quiz</h4>
  <p class="quiz-splash-sub">${total} question${total === 1 ? "" : "s"}, no time limit, just fun.</p>
  <button type="button" class="quiz-btn quiz-start-btn" id="quiz-start">
- Start
  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
- <path d="M3 8 L 13 8 M 9 4 L 13 8 L 9 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M8 1.5 C 5.8 4 4.8 6.4 4.8 8.8 L 4.8 10.6 L 6.2 10.6 L 6.2 12 L 4.2 13.4 L 5.2 13.9 L 6.2 13.2 L 6.8 13.9 L 8 13 L 9.2 13.9 L 9.8 13.2 L 10.8 13.9 L 11.8 13.4 L 9.8 12 L 9.8 10.6 L 11.2 10.6 L 11.2 8.8 C 11.2 6.4 10.2 4 8 1.5 Z" fill="currentColor"/>
  </svg>
+ Blast off
  </button>
  </div>`;
   const startBtn = document.getElementById("quiz-start");
   if (startBtn) {
     startBtn.addEventListener("click", () => {
       s.started = true;
-      renderQuiz();
+      runCountdownThen(() => renderQuiz());
     });
     setTimeout(() => startBtn.focus(), 50);
   }
 }
 
+// Per-quiz colour palette for the splash scene
+const QUIZ_PALETTE = {
+  default:  { p1: "#ffd28a", p2: "#e07a3a", p3: "#3a0f06", accent: "#ffc04d" },
+  Sun:      { p1: "#fff1c2", p2: "#ffb44d", p3: "#7a3700", accent: "#ffc04d" },
+  Mercury:  { p1: "#d8d2c8", p2: "#a08a72", p3: "#3a2a1a", accent: "#e0b890" },
+  Venus:    { p1: "#ffe6b0", p2: "#dba85a", p3: "#553200", accent: "#f0c060" },
+  Earth:    { p1: "#a8e1ff", p2: "#3b78c4", p3: "#0a2a55", accent: "#7adfff" },
+  Moon:     { p1: "#f4f1e8", p2: "#9c9586", p3: "#2a261d", accent: "#e8e0c8" },
+  Mars:     { p1: "#ffcfa8", p2: "#c14a2a", p3: "#3a0f02", accent: "#ff7a4a" },
+  Jupiter:  { p1: "#ffe0c0", p2: "#c8804a", p3: "#3a2008", accent: "#ffb068" },
+  Saturn:   { p1: "#ffeebb", p2: "#d8a85a", p3: "#3a2a0a", accent: "#f6d168" },
+  Uranus:   { p1: "#c8f0ff", p2: "#6ec8d2", p3: "#0e3540", accent: "#9be6ee" },
+  Neptune:  { p1: "#a8c0ff", p2: "#3c5fc8", p3: "#091840", accent: "#7ea0ff" },
+  Pluto:    { p1: "#e8d8c0", p2: "#a07a5a", p3: "#2a1f12", accent: "#d8b890" },
+};
+
+function runCountdownThen(after) {
+  const steps = [
+    { label: "3", cls: "cd-3" },
+    { label: "2", cls: "cd-2" },
+    { label: "1", cls: "cd-1" },
+    { label: "GO!", cls: "cd-go" },
+  ];
+  const stepMs = 600;
+  quizBody.innerHTML = `<div class="quiz-countdown" aria-live="polite"><span class="cd-num"></span></div>`;
+  const numEl = quizBody.querySelector(".cd-num");
+  let i = 0;
+  function tick() {
+    if (!quizState || quizState.aborted) return;
+    if (i >= steps.length) { after(); return; }
+    const step = steps[i++];
+    numEl.textContent = step.label;
+    numEl.className = "cd-num " + step.cls;
+    // Force reflow to restart the animation
+    void numEl.offsetWidth;
+    setTimeout(tick, stepMs);
+  }
+  tick();
+}
+
 function closeQuiz() {
+  if (quizState) quizState.aborted = true;
   quizOverlay.hidden = true;
   quizState = null;
 }
@@ -3757,25 +3813,53 @@ function renderQuiz() {
   if (s.idx >= total) {
     // Final score
     quizProgressFill.style.width = "100%";
-    let msg;
+    let msg, mood;
     if (s.score === total) {
-      msg = `Perfect! You got <strong>${s.score} / ${total}</strong>. You\u2019re a ${s.name} expert.`;
-      burstConfetti();
-    } else if (s.score >= total - 1)
-      msg = `Awesome, <strong>${s.score} / ${total}</strong>! You really know your stuff.`;
-    else if (s.score >= Math.ceil(total / 2))
-      msg = `Nice work, <strong>${s.score} / ${total}</strong>. Read the panel and try again!`;
-    else
-      msg = `<strong>${s.score} / ${total}</strong>. Tricky! Read the facts and beat your score.`;
+      msg = `You\u2019re a ${s.name} expert!`;
+      mood = "perfect";
+    } else if (s.score >= total - 1) {
+      msg = `Awesome, you really know your stuff!`;
+      mood = "great";
+    } else if (s.score >= Math.ceil(total / 2)) {
+      msg = `Nice work. Read the panel and try again.`;
+      mood = "good";
+    } else {
+      msg = `Tricky! Read the facts and beat your score.`;
+      mood = "tryagain";
+    }
     quizBody.innerHTML = `
- <div class="quiz-end">
- <div class="quiz-trophy" aria-hidden="true">★</div>
+ <div class="quiz-end ${mood}">
+ <div class="quiz-end-stars" aria-hidden="true">
+ ${Array.from({ length: total }, (_, i) =>
+   `<span class="qe-star ${i < s.score ? "is-on" : ""}" style="--d:${i * 70}ms"></span>`
+ ).join("")}
+ </div>
+ <div class="quiz-end-score" aria-hidden="true">
+ <span class="qe-score-num" data-target="${s.score}">0</span>
+ <span class="qe-score-of">/ ${total}</span>
+ </div>
  <p class="quiz-end-msg">${msg}</p>
  <div class="quiz-actions">
  <button type="button" class="quiz-btn" id="quiz-retry">Play again</button>
  <button type="button" class="quiz-btn quiz-btn-secondary" id="quiz-done">Close</button>
  </div>
  </div>`;
+    // Count score up
+    const numEl = quizBody.querySelector(".qe-score-num");
+    if (numEl) {
+      const target = s.score;
+      const dur = 600 + target * 80;
+      const start = performance.now();
+      function tickScore(now) {
+        if (!quizState) return;
+        const k = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - k, 3);
+        numEl.textContent = Math.round(target * ease);
+        if (k < 1) requestAnimationFrame(tickScore);
+      }
+      requestAnimationFrame(tickScore);
+    }
+    if (s.score === total) burstConfetti();
     document
       .getElementById("quiz-retry")
       .addEventListener("click", () => openQuiz(s.name));
@@ -3785,15 +3869,27 @@ function renderQuiz() {
 
   const q = s.questions[s.idx];
   quizProgressFill.style.width = `${(s.idx / total) * 100}%`;
+  // Score dots: filled = correct so far, empty = upcoming, ring = current
+  const dotsHTML = Array.from({ length: total }, (_, i) => {
+    let cls = "qdot";
+    if (i < s.idx) cls += s.questions[i]._wasCorrect ? " is-correct" : " is-wrong";
+    if (i === s.idx) cls += " is-current";
+    return `<span class="${cls}"></span>`;
+  }).join("");
   let html = `
+ <div class="quiz-score-row" aria-hidden="true">${dotsHTML}</div>
  <div class="quiz-step">Question ${s.idx + 1} of ${total}</div>
  <p class="quiz-q">${q.q}</p>
  <div class="quiz-choices">`;
   q.choices.forEach((c, i) => {
-    html += `<button type="button" class="quiz-choice" data-i="${i}">${c}</button>`;
+    html += `<button type="button" class="quiz-choice" data-i="${i}" style="--d:${i * 80}ms">${c}</button>`;
   });
   html += `</div><div class="quiz-feedback" hidden></div>`;
   quizBody.innerHTML = html;
+  // Trigger a question-enter animation by toggling a class
+  quizBody.classList.remove("q-enter");
+  void quizBody.offsetWidth;
+  quizBody.classList.add("q-enter");
 
   const fb = quizBody.querySelector(".quiz-feedback");
   quizBody.querySelectorAll(".quiz-choice").forEach((btn) => {
@@ -3802,12 +3898,17 @@ function renderQuiz() {
       s.answered = true;
       const picked = parseInt(btn.dataset.i, 10);
       const correct = picked === q.answer;
+      q._wasCorrect = correct;
       if (correct) s.score++;
       quizBody.querySelectorAll(".quiz-choice").forEach((b, i) => {
         b.disabled = true;
         if (i === q.answer) b.classList.add("correct");
         else if (i === picked) b.classList.add("wrong");
       });
+      // Light tap haptic on supporting touch devices
+      if (navigator.vibrate) {
+        try { navigator.vibrate(correct ? 18 : [12, 60, 12]); } catch (_) {}
+      }
       fb.hidden = false;
       fb.innerHTML =
         `<div class="${correct ? "fb-good" : "fb-bad"}">${correct ? "✓ Correct!" : "✗ Not quite."}</div>` +
