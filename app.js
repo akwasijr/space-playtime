@@ -306,7 +306,7 @@ const roundPointTex = makeRoundPointTexture();
   scene.add(new THREE.Points(hazeGeo, hazeMat));
 })();
 
-scene.add(new THREE.AmbientLight(0x223355, 0.12));
+scene.add(new THREE.AmbientLight(0x556688, 0.45));
 
 // --- Sun ---
 const TEX_BASE = "./textures/";
@@ -322,13 +322,13 @@ function loadTex(file, onReady) {
 }
 
 const sun = new THREE.Mesh(
-  new THREE.SphereGeometry(10, 48, 48),
+  new THREE.SphereGeometry(15, 64, 64),
   new THREE.MeshBasicMaterial({ color: 0xffffff, map: loadTex("sunmap.jpg") }),
 );
 sun.userData = {
   name: "Sun",
   caption: "The Sun. Just a star, but really close.",
-  viewDist: 40,
+  viewDist: 56,
   kind: "star",
 };
 scene.add(sun);
@@ -342,14 +342,14 @@ const sunGlow = new THREE.Sprite(
     depthWrite: false,
   }),
 );
-sunGlow.scale.set(48, 48, 1);
+sunGlow.scale.set(70, 70, 1);
 sun.add(sunGlow);
 
-const sunLight = new THREE.PointLight(0xffe0aa, 1.6, 0, 0);
+const sunLight = new THREE.PointLight(0xffe0aa, 3.4, 0, 0);
 sun.add(sunLight);
 
-// Soft fill so the night side isn't pitch black, and outer planets get a hint of starlight
-scene.add(new THREE.HemisphereLight(0x4466aa, 0x111122, 0.18));
+// Soft fill so the night side isn't pitch black, and outer planets get plenty of starlight
+scene.add(new THREE.HemisphereLight(0x6688bb, 0x222233, 0.55));
 
 // --- Planets, dwarfs, moons ---
 const planetPivots = [];
@@ -447,8 +447,8 @@ const neptuneRings = [
 
 const mercury = makePlanet({
   name: "Mercury",
-  dist: 22,
-  radius: 1.0,
+  dist: 24,
+  radius: 0.7,
   color: 0xa9a9a9,
   caption: "Mercury. Tiny, baked, no atmosphere.",
   orbitSpeed: 0.32,
@@ -458,7 +458,7 @@ const mercury = makePlanet({
 const venus = makePlanet({
   name: "Venus",
   dist: 38,
-  radius: 1.8,
+  radius: 2.0,
   color: 0xe0c280,
   caption: "Venus. Hottest planet, clouds of acid.",
   orbitSpeed: 0.22,
@@ -478,7 +478,7 @@ const earth = makePlanet({
 const mars = makePlanet({
   name: "Mars",
   dist: 95,
-  radius: 1.5,
+  radius: 1.1,
   color: 0xc1573b,
   caption: "Mars. The rusty red one.",
   orbitSpeed: 0.13,
@@ -489,7 +489,7 @@ const mars = makePlanet({
 const jupiter = makePlanet({
   name: "Jupiter",
   dist: 175,
-  radius: 6.5,
+  radius: 12,
   color: 0xd1a472,
   caption: "Jupiter. Bigger than every other planet combined.",
   orbitSpeed: 0.07,
@@ -499,8 +499,8 @@ const jupiter = makePlanet({
 });
 const saturn = makePlanet({
   name: "Saturn",
-  dist: 240,
-  radius: 5.5,
+  dist: 245,
+  radius: 10,
   color: 0xe5c89d,
   caption: "Saturn. The rings are mostly chunks of ice.",
   orbitSpeed: 0.05,
@@ -511,7 +511,7 @@ const saturn = makePlanet({
 const uranus = makePlanet({
   name: "Uranus",
   dist: 320,
-  radius: 3.5,
+  radius: 5,
   color: 0x9ed7e0,
   caption: "Uranus. Tipped on its side. Methane makes it blue.",
   orbitSpeed: 0.035,
@@ -522,7 +522,7 @@ const uranus = makePlanet({
 const neptune = makePlanet({
   name: "Neptune",
   dist: 400,
-  radius: 3.4,
+  radius: 4.9,
   color: 0x4a7ddc,
   caption: "Neptune. Wind storms hit 2,000 km/h.",
   orbitSpeed: 0.025,
