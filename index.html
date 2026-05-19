@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Space</title>
-<link rel="stylesheet" href="styles.css?v=26" />
+<link rel="stylesheet" href="styles.css?v=27" />
 <script type="importmap">
 {
   "imports": {
@@ -199,6 +199,15 @@
 
   <button id="info-toggle" class="info-toggle" type="button" aria-label="More about this object" hidden>i</button>
 
+  <button id="galaxy-learn" class="galaxy-learn" type="button" hidden>
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <circle cx="8" cy="5" r="0.9" fill="currentColor"/>
+      <path d="M7.2 7.4 L 7.2 11.6 L 8.8 11.6 L 8.8 7.4 Z" fill="currentColor"/>
+    </svg>
+    <span>About the Milky Way</span>
+  </button>
+
   <!-- Quiz overlay -->
   <div id="quiz-overlay" class="quiz-overlay" hidden>
     <div class="quiz-card" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
@@ -241,6 +250,6 @@
     </svg>
   </div>
 
-  <script type="module" src="app.js?v=26"></script>
+  <script type="module" src="app.js?v=27"></script>
 </body>
 </html>

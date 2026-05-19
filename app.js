@@ -73,7 +73,7 @@ const LensShader = {
  void main() {
  vec2 frag = vUv * uResolution;
  vec2 bhPx = (uBH * 0.5 + 0.5) * uResolution;
- vec2 d = frag - bhPx;
+ vec2 d = frag, bhPx;
  float dist = length(d);
 
  if (uActive < 0.5 || uHorizonPx < 1.0) {
@@ -92,9 +92,9 @@ const LensShader = {
 
  // Lensing zone
  if (dist < influence) {
- float t = (dist - horizon) / (influence - horizon);
+ float t = (dist, horizon) / (influence, horizon);
  // Stronger bend close to the horizon, falls off outward
- float bend = pow(1.0 - t, 2.6) * horizon * 3.5;
+ float bend = pow(1.0, t, 2.6) * horizon * 3.5;
  vec2 dir = d / dist;
  vec2 newPx = frag + dir * bend;
  vec2 newUv = clamp(newPx / uResolution, 0.0, 1.0);
@@ -104,13 +104,13 @@ const LensShader = {
  vec3 col;
  col.r = texture2D(tDiffuse, clamp((newPx + dir * chroma) / uResolution, 0.0, 1.0)).r;
  col.g = texture2D(tDiffuse, newUv).g;
- col.b = texture2D(tDiffuse, clamp((newPx - dir * chroma) / uResolution, 0.0, 1.0)).b;
+ col.b = texture2D(tDiffuse, clamp((newPx, dir * chroma) / uResolution, 0.0, 1.0)).b;
 
  // Einstein ring: bright halo just outside horizon
  float ringInner = horizon * 1.00;
  float ringPeak = horizon * 1.10;
  float ringOuter = horizon * 1.45;
- float ring = smoothstep(ringInner, ringPeak, dist) * (1.0 - smoothstep(ringPeak, ringOuter, dist));
+ float ring = smoothstep(ringInner, ringPeak, dist) * (1.0, smoothstep(ringPeak, ringOuter, dist));
  col += vec3(1.0, 0.78, 0.45) * ring * 1.4;
 
  gl_FragColor = vec4(col, 1.0);
@@ -327,7 +327,7 @@ const sun = new THREE.Mesh(
 );
 sun.userData = {
   name: "Sun",
-  caption: "The Sun. Just a star - but really close.",
+  caption: "The Sun. Just a star, but really close.",
   viewDist: 40,
   kind: "star",
 };
@@ -460,7 +460,7 @@ const venus = makePlanet({
   dist: 38,
   radius: 1.8,
   color: 0xe0c280,
-  caption: "Venus. Hottest planet - clouds of acid.",
+  caption: "Venus. Hottest planet, clouds of acid.",
   orbitSpeed: 0.22,
   texture: "venusmap.jpg",
 });
@@ -546,7 +546,7 @@ const pluto = makePlanet({
   dist: 510,
   radius: 0.85,
   color: 0xc7a890,
-  caption: "Pluto. Used to be a planet - now a dwarf planet.",
+  caption: "Pluto. Used to be a planet, now a dwarf planet.",
   orbitSpeed: 0.018,
   dwarf: true,
   texture: "plutomap1k.jpg",
@@ -969,7 +969,7 @@ addMoon(neptune, {
   radius: 0.55,
   color: 0xd0c9bd,
   speed: -0.65,
-  caption: "Triton. Orbits backwards - probably a captured Kuiper-belt object.",
+  caption: "Triton. Orbits backwards, probably a captured Kuiper-belt object.",
   procOpts: { craters: 25, maria: 90, icy: true, accent: "#b08858" },
 });
 addMoon(neptune, {
@@ -1337,7 +1337,7 @@ const starData = [
     name: "Betelgeuse",
     pos: [320, -50, -240],
     color: 0xff7755,
-    caption: "Betelgeuse. A red giant - about to explode (in star time).",
+    caption: "Betelgeuse. A red giant, about to explode (in star time).",
   },
   {
     name: "Rigel",
@@ -1592,15 +1592,15 @@ setDetails(sun, {
   image: `${WC}/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/400px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg`,
   credit: "Image: NASA / SDO",
   intro: [
-    `The <strong>Sun</strong> is a giant ball of glowing gas - mostly hydrogen - and its gravity is what keeps every planet, moon, asteroid and comet in our solar system from flying off into space.`,
+    `The <strong>Sun</strong> is a giant ball of glowing gas, mostly hydrogen, and its gravity is what keeps every planet, moon, asteroid and comet in our solar system from flying off into space.`,
     `It's not on fire like a campfire. It's a <strong>giant fusion reactor</strong>: every second, it squashes 600 million tonnes of hydrogen into helium, and the leftover energy is what we feel as sunlight.`,
   ],
   facts: [
-    `It's <strong>1.4 million km</strong> across - you could line up about <strong>109 Earths</strong> across it, or fit a million inside.`,
+    `It's <strong>1.4 million km</strong> across, you could line up about <strong>109 Earths</strong> across it, or fit a million inside.`,
     `The Sun makes up <strong>99.86%</strong> of all the mass in the solar system. Everything else combined is the leftover crumbs.`,
     `Light from the Sun takes about <strong>8 minutes and 20 seconds</strong> to reach your eyes. So you're always seeing the past!`,
     `The surface is around <strong>5,500°C</strong>, but the corona (its outer atmosphere) is over <strong>1,000,000°C</strong>. Nobody fully knows why.`,
-    `In about <strong>5 billion years</strong> it'll swell into a red giant - big enough to swallow Mercury, Venus, and maybe Earth.`,
+    `In about <strong>5 billion years</strong> it'll swell into a red giant, big enough to swallow Mercury, Venus, and maybe Earth.`,
   ],
   stats: {
     Type: "Yellow dwarf star",
@@ -1616,7 +1616,7 @@ setDetails(mercury, {
   image: `${WC}/4/4a/Mercury_in_color_-_Prockter07-edit1.jpg/400px-Mercury_in_color_-_Prockter07-edit1.jpg`,
   credit: "Image: NASA / MESSENGER",
   intro: [
-    `<strong>Mercury</strong> is the smallest planet and the closest one to the Sun. It zips around its orbit faster than anything else - that's how it got its name (Mercury was the speedy messenger of the Roman gods).`,
+    `<strong>Mercury</strong> is the smallest planet and the closest one to the Sun. It zips around its orbit faster than anything else, that's how it got its name (Mercury was the speedy messenger of the Roman gods).`,
     `It's basically a <strong>cratered rock</strong>, almost no atmosphere, looking a lot like our Moon.`,
   ],
   facts: [
@@ -1640,15 +1640,15 @@ setDetails(venus, {
   image: `${WC}/e/e5/Venus-real_color.jpg/400px-Venus-real_color.jpg`,
   credit: "Image: NASA / Mariner 10",
   intro: [
-    `<strong>Venus</strong> is almost exactly the same size as Earth - but if Earth is your friendly neighbour, Venus is the one you'd never visit.`,
+    `<strong>Venus</strong> is almost exactly the same size as Earth, but if Earth is your friendly neighbour, Venus is the one you'd never visit.`,
     `It's wrapped in thick clouds of <strong>sulfuric acid</strong>, the air is 90 times heavier than ours, and it rains acid that evaporates before hitting the ground.`,
   ],
   facts: [
-    `Venus is the <strong>hottest planet</strong> in the solar system - about <strong>465°C</strong>, hot enough to melt lead - even hotter than Mercury, which is closer to the Sun!`,
+    `Venus is the <strong>hottest planet</strong> in the solar system, about <strong>465°C</strong>, hot enough to melt lead, even hotter than Mercury, which is closer to the Sun!`,
     `That's because of a runaway <strong>greenhouse effect</strong>: its thick atmosphere traps the Sun's heat and never lets it out.`,
     `Venus spins <strong>backwards</strong> compared to most planets. On Venus, the Sun rises in the west.`,
     `It spins so slowly that <strong>one Venus day is longer than one Venus year</strong>: 243 Earth days vs 225.`,
-    `It's the brightest natural object in the night sky after the Moon - that's why people call it the "morning star" or "evening star."`,
+    `It's the brightest natural object in the night sky after the Moon, that's why people call it the "morning star" or "evening star."`,
   ],
   stats: {
     Width: "12,104 km",
@@ -1665,16 +1665,16 @@ setDetails(earth, {
   image: `${WC}/9/97/The_Earth_seen_from_Apollo_17.jpg/400px-The_Earth_seen_from_Apollo_17.jpg`,
   credit: "Image: NASA / Apollo 17 (1972)",
   intro: [
-    `<strong>Earth</strong> is the only place we've ever found that has life. Anything alive that you've ever seen, heard about, eaten, or been - it all comes from this one little blue ball.`,
+    `<strong>Earth</strong> is the only place we've ever found that has life. Anything alive that you've ever seen, heard about, eaten, or been, it all comes from this one little blue ball.`,
     `From space it looks calm and beautiful, but it's actually a <strong>spinning, churning, magnetic ball of rock and water</strong> with a molten iron core.`,
   ],
   facts: [
     `Earth spins at about <strong>1,670 km/h</strong> at the equator. You're moving that fast right now and don't even feel it.`,
-    `<strong>71%</strong> of the surface is covered in water - but <strong>97%</strong> of that water is salty oceans.`,
+    `<strong>71%</strong> of the surface is covered in water, but <strong>97%</strong> of that water is salty oceans.`,
     `Earth's <strong>magnetic field</strong> is created by molten iron sloshing around the core. It shields us from the Sun's nastiest radiation.`,
-    `The atmosphere is mostly <strong>nitrogen (78%)</strong> and <strong>oxygen (21%)</strong> - a tiny bit of everything else.`,
+    `The atmosphere is mostly <strong>nitrogen (78%)</strong> and <strong>oxygen (21%)</strong>, a tiny bit of everything else.`,
     `Earth is the <strong>only planet</strong> not named after a Greek or Roman god. The name just means "ground."`,
-    `Mount Everest is the tallest mountain above sea level, but Mauna Kea (in Hawaii) is taller from base to peak - most of it is underwater.`,
+    `Mount Everest is the tallest mountain above sea level, but Mauna Kea (in Hawaii) is taller from base to peak, most of it is underwater.`,
   ],
   stats: {
     Width: "12,742 km",
@@ -1691,16 +1691,16 @@ setDetails(moon, {
   image: `${WC}/e/e1/FullMoon2010.jpg/400px-FullMoon2010.jpg`,
   credit: "Image: Gregory H. Revera",
   intro: [
-    `The <strong>Moon</strong> is Earth's only natural satellite. Without it, life on Earth would be very different - it stabilises our tilt and gives us tides.`,
+    `The <strong>Moon</strong> is Earth's only natural satellite. Without it, life on Earth would be very different, it stabilises our tilt and gives us tides.`,
     `Scientists think the Moon formed when a <strong>Mars-sized object slammed into baby Earth</strong> about 4.5 billion years ago, and the debris clumped together.`,
   ],
   facts: [
-    `The Moon always shows us the <strong>same face</strong>. It spins at exactly the same rate it orbits - that's called being "tidally locked."`,
-    `Footprints left by the <strong>Apollo astronauts</strong> in 1969 - 1972 are still there. There's no wind or rain to wipe them away.`,
+    `The Moon always shows us the <strong>same face</strong>. It spins at exactly the same rate it orbits, that's called being "tidally locked."`,
+    `Footprints left by the <strong>Apollo astronauts</strong> from 1969 to 1972 are still there. There's no wind or rain to wipe them away.`,
     `Only <strong>12 humans</strong> have ever walked on the Moon, all between 1969 and 1972.`,
-    `The Moon is <strong>drifting away</strong> from Earth at about <strong>3.8 cm per year</strong> - about as fast as your fingernails grow.`,
+    `The Moon is <strong>drifting away</strong> from Earth at about <strong>3.8 cm per year</strong>, about as fast as your fingernails grow.`,
     `If you could drive a car to the Moon at highway speed, it would take you about <strong>5 months</strong>.`,
-    `The dark patches you see are called <strong>maria</strong> (Latin for "seas") - they're frozen lava plains, not water.`,
+    `The dark patches you see are called <strong>maria</strong> (Latin for "seas"), they're frozen lava plains, not water.`,
   ],
   stats: {
     Width: "3,474 km (~¼ of Earth)",
@@ -1717,15 +1717,15 @@ setDetails(mars, {
   credit: "Image: ESA / Rosetta",
   intro: [
     `<strong>Mars</strong> is the rusty red neighbour. It's about half the size of Earth and the most likely place in the solar system where humans might one day live.`,
-    `The red colour comes from <strong>iron oxide</strong> - basically the entire planet is covered in rust.`,
+    `The red colour comes from <strong>iron oxide</strong>, basically the entire planet is covered in rust.`,
   ],
   facts: [
-    `<strong>Olympus Mons</strong>, the biggest volcano in the solar system, is on Mars. It's about <strong>22 km tall</strong> - three times the height of Mount Everest.`,
+    `<strong>Olympus Mons</strong>, the biggest volcano in the solar system, is on Mars. It's about <strong>22 km tall</strong>, three times the height of Mount Everest.`,
     `Mars has <strong>two tiny potato-shaped moons</strong>, Phobos and Deimos. Phobos is so close it'll eventually crash into Mars or break into a ring.`,
     `A day on Mars is almost the same as Earth: <strong>24 hours and 37 minutes</strong>. Astronauts on Mars wouldn't have to change their watches much.`,
-    `It has the <strong>biggest dust storms</strong> in the solar system - sometimes the entire planet is covered for months.`,
+    `It has the <strong>biggest dust storms</strong> in the solar system, sometimes the entire planet is covered for months.`,
     `There's <strong>frozen water</strong> at the poles and signs that liquid water once flowed across the surface billions of years ago.`,
-    `Multiple <strong>robot rovers</strong> are exploring the surface right now (Curiosity, Perseverance) - your nephew is alive at the same time as Martian rovers!`,
+    `Multiple <strong>robot rovers</strong> are exploring the surface right now (Curiosity, Perseverance), your nephew is alive at the same time as Martian rovers!`,
   ],
   stats: {
     Width: "6,779 km",
@@ -1742,15 +1742,15 @@ setDetails(jupiter, {
   image: `${WC}/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/400px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg`,
   credit: "Image: NASA / Hubble",
   intro: [
-    `<strong>Jupiter</strong> is the boss of the planets - bigger than every other planet combined, and over <strong>twice the mass</strong> of all of them put together.`,
+    `<strong>Jupiter</strong> is the boss of the planets, bigger than every other planet combined, and over <strong>twice the mass</strong> of all of them put together.`,
     `It's a <strong>gas giant</strong>, meaning there's no surface to land on. If you tried, you'd fall through hydrogen and helium clouds for thousands of kilometres until you got crushed.`,
   ],
   facts: [
-    `The <strong>Great Red Spot</strong> is a hurricane <strong>bigger than Earth</strong>. It's been raging for at least <strong>350 years</strong> - and is finally starting to shrink.`,
-    `Jupiter spins so fast that one day there is just <strong>under 10 hours</strong> - the fastest day of any planet.`,
-    `It has at least <strong>95 known moons</strong>. The four biggest - <strong>Io, Europa, Ganymede, Callisto</strong> - were spotted by Galileo in 1610 with a tiny telescope.`,
+    `The <strong>Great Red Spot</strong> is a hurricane <strong>bigger than Earth</strong>. It's been raging for at least <strong>350 years</strong>, and is finally starting to shrink.`,
+    `Jupiter spins so fast that one day there is just <strong>under 10 hours</strong>, the fastest day of any planet.`,
+    `It has at least <strong>95 known moons</strong>. The four biggest, <strong>Io, Europa, Ganymede, Callisto</strong>, were spotted by Galileo in 1610 with a tiny telescope.`,
     `<strong>Ganymede</strong> is bigger than the planet Mercury. If it orbited the Sun instead of Jupiter, we'd call it a planet.`,
-    `<strong>Europa</strong> has a frozen ocean of liquid water under its ice - one of the best places in the solar system to look for alien life.`,
+    `<strong>Europa</strong> has a frozen ocean of liquid water under its ice, one of the best places in the solar system to look for alien life.`,
     `Jupiter has rings too! They're just thin and dusty, so you usually can't see them.`,
     `Jupiter is like a <strong>cosmic vacuum cleaner</strong>: its huge gravity slingshots a lot of asteroids and comets away from the inner planets, protecting Earth.`,
   ],
@@ -1769,16 +1769,16 @@ setDetails(saturn, {
   image: `${WC}/c/c7/Saturn_during_Equinox.jpg/400px-Saturn_during_Equinox.jpg`,
   credit: "Image: NASA / Cassini",
   intro: [
-    `<strong>Saturn</strong> is famous for its rings - the most spectacular set of rings in the solar system, made of <strong>billions of pieces of ice and rock</strong>, from grains of dust to chunks the size of a house.`,
+    `<strong>Saturn</strong> is famous for its rings, the most spectacular set of rings in the solar system, made of <strong>billions of pieces of ice and rock</strong>, from grains of dust to chunks the size of a house.`,
     `It's the second biggest planet, also a gas giant, and it's so puffy that if you could find a bathtub big enough, <strong>Saturn would float in water</strong>.`,
   ],
   facts: [
-    `The rings are <strong>280,000 km wide</strong> - almost the distance from Earth to the Moon - but typically <strong>less than 1 km thick</strong>. They're like a giant flat pancake.`,
-    `Saturn has at least <strong>146 moons</strong>. The biggest, <strong>Titan</strong>, is the only moon in the solar system with a thick atmosphere - and it has lakes of <strong>liquid methane</strong>.`,
-    `Another moon, <strong>Enceladus</strong>, shoots geysers of water out of its south pole - strong evidence of a hidden ocean.`,
+    `The rings are <strong>280,000 km wide</strong>, almost the distance from Earth to the Moon, but typically <strong>less than 1 km thick</strong>. They're like a giant flat pancake.`,
+    `Saturn has at least <strong>146 moons</strong>. The biggest, <strong>Titan</strong>, is the only moon in the solar system with a thick atmosphere, and it has lakes of <strong>liquid methane</strong>.`,
+    `Another moon, <strong>Enceladus</strong>, shoots geysers of water out of its south pole, strong evidence of a hidden ocean.`,
     `There's a giant <strong>hexagon-shaped storm</strong> at Saturn's north pole. Nobody is fully sure how a hexagon forms in clouds.`,
-    `Saturn's rings will eventually <strong>disappear</strong> - they're slowly raining down onto the planet over millions of years.`,
-    `Saturn's wind speeds can hit <strong>1,800 km/h</strong> - way faster than any storm on Earth.`,
+    `Saturn's rings will eventually <strong>disappear</strong>, they're slowly raining down onto the planet over millions of years.`,
+    `Saturn's wind speeds can hit <strong>1,800 km/h</strong>, way faster than any storm on Earth.`,
   ],
   stats: {
     Width: "116,460 km (9 × Earth)",
@@ -1795,14 +1795,14 @@ setDetails(uranus, {
   image: `${WC}/3/3d/Uranus2.jpg/400px-Uranus2.jpg`,
   credit: "Image: NASA / Voyager 2",
   intro: [
-    `<strong>Uranus</strong> is the weird one. While every other planet spins more or less upright, Uranus is <strong>tipped over on its side</strong> - its axis is tilted nearly <strong>98°</strong>.`,
+    `<strong>Uranus</strong> is the weird one. While every other planet spins more or less upright, Uranus is <strong>tipped over on its side</strong>, its axis is tilted nearly <strong>98°</strong>.`,
     `Scientists think it got hit by something <strong>Earth-sized</strong> billions of years ago, and the impact knocked it over. It's been rolling around the Sun like a barrel ever since.`,
   ],
   facts: [
     `Because of the sideways tilt, each pole gets <strong>42 years of sunlight</strong> followed by <strong>42 years of darkness</strong>. Wild summers, brutal winters.`,
-    `Uranus is an <strong>ice giant</strong> - its blue colour comes from <strong>methane</strong> in its atmosphere, which absorbs red light.`,
+    `Uranus is an <strong>ice giant</strong>, its blue colour comes from <strong>methane</strong> in its atmosphere, which absorbs red light.`,
     `It's the <strong>coldest planet</strong> in the solar system, even though Neptune is further away. Temperatures can drop to <strong>−224°C</strong>.`,
-    `It has <strong>13 thin rings</strong>, much darker than Saturn's - they were only discovered in 1977.`,
+    `It has <strong>13 thin rings</strong>, much darker than Saturn's, they were only discovered in 1977.`,
     `Most of its <strong>27 moons</strong> are named after characters from Shakespeare and Alexander Pope, like Titania, Oberon, Puck, and Ariel.`,
     `One year on Uranus = <strong>84 Earth years</strong>. Most people only experience one Uranian year in their entire life.`,
   ],
@@ -1821,16 +1821,16 @@ setDetails(neptune, {
   image: `${WC}/5/56/Neptune_Full.jpg/400px-Neptune_Full.jpg`,
   credit: "Image: NASA / Voyager 2",
   intro: [
-    `<strong>Neptune</strong> is the furthest "real" planet from the Sun - a deep blue ice giant out in the cold dark.`,
+    `<strong>Neptune</strong> is the furthest "real" planet from the Sun, a deep blue ice giant out in the cold dark.`,
     `It's so far away that the Sun looks like just a really bright star from there. Sunlight there is about <strong>900 times dimmer</strong> than on Earth.`,
   ],
   facts: [
-    `Neptune has the <strong>fastest winds</strong> in the solar system - storms whip across the surface at <strong>2,000 km/h</strong>, faster than the speed of sound on Earth.`,
-    `It was the <strong>first planet found by maths</strong>, not by looking. Astronomers noticed Uranus was wobbling, calculated where the gravity was coming from, pointed a telescope there in 1846 - and there was Neptune.`,
+    `Neptune has the <strong>fastest winds</strong> in the solar system, storms whip across the surface at <strong>2,000 km/h</strong>, faster than the speed of sound on Earth.`,
+    `It was the <strong>first planet found by maths</strong>, not by looking. Astronomers noticed Uranus was wobbling, calculated where the gravity was coming from, pointed a telescope there in 1846, and there was Neptune.`,
     `One year on Neptune = <strong>165 Earth years</strong>. Since its discovery in 1846, it has only completed <strong>one orbit around the Sun</strong>.`,
-    `Its biggest moon, <strong>Triton</strong>, orbits backwards - meaning it was probably a Kuiper belt object that Neptune captured.`,
+    `Its biggest moon, <strong>Triton</strong>, orbits backwards, meaning it was probably a Kuiper belt object that Neptune captured.`,
     `Triton has <strong>nitrogen geysers</strong> shooting up from its surface, even though it's −235°C.`,
-    `Neptune has <strong>5 main rings</strong> (Galle, Le Verrier, Lassell, Arago, Adams) - but they're faint and clumpy, not smooth like Saturn's.`,
+    `Neptune has <strong>5 main rings</strong> (Galle, Le Verrier, Lassell, Arago, Adams), but they're faint and clumpy, not smooth like Saturn's.`,
   ],
   stats: {
     Width: "49,244 km (4 × Earth)",
@@ -1847,12 +1847,12 @@ setDetails(ceres, {
   image: `${WC}/9/94/Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg/400px-Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg`,
   credit: "Image: NASA / Dawn",
   intro: [
-    `<strong>Ceres</strong> is a dwarf planet hiding in the <strong>asteroid belt</strong> between Mars and Jupiter. It's the biggest object in that belt - about the size of Texas.`,
+    `<strong>Ceres</strong> is a dwarf planet hiding in the <strong>asteroid belt</strong> between Mars and Jupiter. It's the biggest object in that belt, about the size of Texas.`,
     `When it was discovered in 1801 it was called the <strong>eighth planet</strong>! Then more rocks were found nearby, and it got reclassified as an asteroid. In 2006, it was promoted again to "dwarf planet."`,
   ],
   facts: [
     `Ceres makes up about <strong>1/3 of all the mass</strong> in the asteroid belt by itself.`,
-    `Its surface has weird <strong>bright spots</strong> in some craters - they're salt deposits left behind by water that bubbled up and froze.`,
+    `Its surface has weird <strong>bright spots</strong> in some craters, they're salt deposits left behind by water that bubbled up and froze.`,
     `Scientists think there's a <strong>layer of liquid water</strong> deep under the icy crust, making it one of the best places to look for life nearby.`,
     `It's the only dwarf planet in the inner solar system. All the others (Pluto, Eris, etc.) are way out beyond Neptune.`,
   ],
@@ -1874,12 +1874,12 @@ setDetails(pluto, {
     `Lots of people are still grumpy about it.`,
   ],
   facts: [
-    `Pluto is <strong>smaller than Earth's Moon</strong> - about <strong>2,377 km</strong> wide.`,
+    `Pluto is <strong>smaller than Earth's Moon</strong>, about <strong>2,377 km</strong> wide.`,
     `It has a giant <strong>heart-shaped patch</strong> of frozen nitrogen on its surface called <strong>Tombaugh Regio</strong>, named after Pluto's discoverer.`,
     `Its biggest moon, <strong>Charon</strong>, is half Pluto's size. They orbit each other so closely that they're almost a <strong>double dwarf-planet</strong>.`,
     `In 2015 the <strong>New Horizons</strong> spacecraft flew past and gave us our first real close-up photos. Before that, all our best images were just blurry dots.`,
     `One Pluto year = <strong>248 Earth years</strong>. Since its discovery in 1930, it hasn't even gone halfway around the Sun yet.`,
-    `Pluto has mountains made of <strong>solid water ice</strong> - at −230°C, ice is hard as rock.`,
+    `Pluto has mountains made of <strong>solid water ice</strong>, at −230°C, ice is hard as rock.`,
   ],
   stats: {
     Width: "2,377 km",
@@ -1896,12 +1896,12 @@ setDetails(haumea, {
   image: `${WC}/3/3c/2003EL61art.jpg/400px-2003EL61art.jpg`,
   credit: "Artist impression: A. Feild / STScI",
   intro: [
-    `<strong>Haumea</strong> is one of the strangest dwarf planets - it's stretched out like an <strong>American football</strong> because it spins so incredibly fast.`,
+    `<strong>Haumea</strong> is one of the strangest dwarf planets, it's stretched out like an <strong>American football</strong> because it spins so incredibly fast.`,
   ],
   facts: [
-    `A day on Haumea is just <strong>under 4 hours long</strong> - one of the fastest spinning objects in the solar system.`,
+    `A day on Haumea is just <strong>under 4 hours long</strong>, one of the fastest spinning objects in the solar system.`,
     `It's so spinny that the centrifugal force has stretched the whole planet into an oval shape.`,
-    `It has <strong>two tiny moons</strong> (Hi'iaka and Namaka) and a <strong>thin ring</strong> - the first ring ever spotted around a dwarf planet.`,
+    `It has <strong>two tiny moons</strong> (Hi'iaka and Namaka) and a <strong>thin ring</strong>, the first ring ever spotted around a dwarf planet.`,
     `It's named after the <strong>Hawaiian goddess</strong> of childbirth and fertility.`,
   ],
   stats: {
@@ -1941,12 +1941,12 @@ setDetails(eris, {
   credit: "Image: NASA / Hubble",
   intro: [
     `<strong>Eris</strong> is the dwarf planet that started a fight. When astronomers found it in 2005 and realised it was about <strong>Pluto's size</strong>, they had to decide: do we call Eris a planet too, or change the rules?`,
-    `They changed the rules - and Pluto became a dwarf planet. Eris is named after the <strong>Greek goddess of strife and chaos</strong>, which is pretty appropriate.`,
+    `They changed the rules, and Pluto became a dwarf planet. Eris is named after the <strong>Greek goddess of strife and chaos</strong>, which is pretty appropriate.`,
   ],
   facts: [
-    `Eris is roughly the same size as Pluto but is actually <strong>more massive</strong> - it's the heaviest dwarf planet we know of.`,
+    `Eris is roughly the same size as Pluto but is actually <strong>more massive</strong>, it's the heaviest dwarf planet we know of.`,
     `It's so far away that one orbit takes <strong>557 Earth years</strong>.`,
-    `Its surface is <strong>extremely reflective</strong> - almost like fresh snow - because nitrogen freezes solid in the ridiculous cold (−230°C).`,
+    `Its surface is <strong>extremely reflective</strong>, almost like fresh snow, because nitrogen freezes solid in the ridiculous cold (−230°C).`,
     `It has one moon, <strong>Dysnomia</strong>, named after the daughter of Eris (goddess of lawlessness).`,
   ],
   stats: {
@@ -1965,13 +1965,13 @@ for (const s of namedStars) {
       image: `${WC}/b/b2/Sirius_A_and_B_Hubble_photo.jpg/400px-Sirius_A_and_B_Hubble_photo.jpg`,
       credit: "Image: NASA / Hubble",
       intro: [
-        `<strong>Sirius</strong> is the brightest star in the night sky (after the Sun). You can spot it on winter nights low on the horizon - it twinkles like crazy and sometimes flashes red, white, and blue.`,
+        `<strong>Sirius</strong> is the brightest star in the night sky (after the Sun). You can spot it on winter nights low on the horizon, it twinkles like crazy and sometimes flashes red, white, and blue.`,
       ],
       facts: [
-        `It's only <strong>8.6 light-years</strong> away - practically next door, in cosmic terms.`,
+        `It's only <strong>8.6 light-years</strong> away, practically next door, in cosmic terms.`,
         `It's actually <strong>two stars</strong>: a bright blue-white star (Sirius A) and a tiny dense companion (Sirius B), called the "Pup."`,
-        `Sirius B is a <strong>white dwarf</strong> - the leftover core of a dead star - about the size of Earth but with the mass of the Sun. A teaspoon of it would weigh tonnes.`,
-        `The ancient Egyptians used Sirius as their <strong>calendar</strong> - when it first appeared in the dawn sky each year, the Nile was about to flood.`,
+        `Sirius B is a <strong>white dwarf</strong>, the leftover core of a dead star, about the size of Earth but with the mass of the Sun. A teaspoon of it would weigh tonnes.`,
+        `The ancient Egyptians used Sirius as their <strong>calendar</strong>, when it first appeared in the dawn sky each year, the Nile was about to flood.`,
         `Its name means <strong>"glowing"</strong> or "scorching" in ancient Greek.`,
       ],
       stats: {
@@ -1987,14 +1987,14 @@ for (const s of namedStars) {
       credit: "Image: ALMA (ESO/NAOJ/NRAO)",
       intro: [
         `<strong>Betelgeuse</strong> (say it: "BET-el-juice") is one of the biggest stars you can see with your eyes. It's the <strong>red shoulder of Orion</strong>.`,
-        `It's a <strong>red supergiant</strong> - a star that has burned through its hydrogen fuel and puffed up to a monstrous size.`,
+        `It's a <strong>red supergiant</strong>, a star that has burned through its hydrogen fuel and puffed up to a monstrous size.`,
       ],
       facts: [
-        `If you put Betelgeuse where the Sun is, it would <strong>swallow Mercury, Venus, Earth, and Mars</strong> - and reach almost out to Jupiter.`,
+        `If you put Betelgeuse where the Sun is, it would <strong>swallow Mercury, Venus, Earth, and Mars</strong>, and reach almost out to Jupiter.`,
         `It's around <strong>700 light-years</strong> away.`,
         `It's nearing the end of its life and will eventually <strong>explode as a supernova</strong>. Could be tomorrow, could be 100,000 years from now.`,
-        `When it goes, it'll briefly be as <strong>bright as the full Moon</strong>, even in the daytime - visible for months.`,
-        `In 2019 - 2020 it suddenly <strong>dimmed dramatically</strong>, making people wonder if it was about to blow. Turned out it just burped out a giant cloud of dust.`,
+        `When it goes, it'll briefly be as <strong>bright as the full Moon</strong>, even in the daytime, visible for months.`,
+        `Between 2019 and 2020 it suddenly <strong>dimmed dramatically</strong>, making people wonder if it was about to blow. Turned out it just burped out a giant cloud of dust.`,
       ],
       stats: {
         Distance: "~700 light-years",
@@ -2009,15 +2009,15 @@ for (const s of namedStars) {
       image: `${WC}/0/0d/Rigel%2C_alpha_Lyrae%2C_Sirius%2C_Procyon_and_Canopus_relative_sizes.png/400px-Rigel%2C_alpha_Lyrae%2C_Sirius%2C_Procyon_and_Canopus_relative_sizes.png`,
       credit: "Star size comparison",
       intro: [
-        `<strong>Rigel</strong> is the bright blue star at the bottom of the constellation <strong>Orion</strong> - the hunter's foot.`,
+        `<strong>Rigel</strong> is the bright blue star at the bottom of the constellation <strong>Orion</strong>, the hunter's foot.`,
         `It's a <strong>blue supergiant</strong>, one of the most luminous stars visible to the naked eye.`,
       ],
       facts: [
         `Rigel shines about <strong>120,000 times brighter</strong> than the Sun.`,
-        `Its surface burns at around <strong>12,000°C</strong> - twice as hot as the Sun. That's why it looks blue-white instead of yellow.`,
-        `It's around <strong>860 light-years</strong> away - the light you see tonight left Rigel around the year 1160.`,
+        `Its surface burns at around <strong>12,000°C</strong>, twice as hot as the Sun. That's why it looks blue-white instead of yellow.`,
+        `It's around <strong>860 light-years</strong> away, the light you see tonight left Rigel around the year 1160.`,
         `Like Sirius, it's actually a system: <strong>at least four stars</strong> orbiting each other.`,
-        `Rigel will also explode as a <strong>supernova</strong> someday - sometime in the next few million years.`,
+        `Rigel will also explode as a <strong>supernova</strong> someday, sometime in the next few million years.`,
       ],
       stats: {
         Distance: "~860 light-years",
@@ -2033,17 +2033,17 @@ setDetails(blackHole, {
   image: `${WC}/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/400px-Black_hole_-_Messier_87_crop_max_res.jpg`,
   credit: "Image: Event Horizon Telescope (M87*)",
   intro: [
-    `A <strong>black hole</strong> is a place where gravity is so strong that <strong>nothing can escape</strong> - not even light. Once something falls in, it's gone forever.`,
+    `A <strong>black hole</strong> is a place where gravity is so strong that <strong>nothing can escape</strong>, not even light. Once something falls in, it's gone forever.`,
     `Black holes form when a really massive star <strong>runs out of fuel and collapses</strong> in on itself. The matter gets squashed into a single point with infinite density called a <strong>singularity</strong>.`,
-    `The one in this scene is styled after <strong>Gargantua</strong> from the movie <em>Interstellar</em> - and like real black holes, it bends light around itself, making the disc of glowing matter wrap up over the top.`,
+    `The one in this scene is styled after <strong>Gargantua</strong> from the movie <em>Interstellar</em>, and like real black holes, it bends light around itself, making the disc of glowing matter wrap up over the top.`,
   ],
   facts: [
-    `The boundary around a black hole is called the <strong>event horizon</strong>. Cross it and you can never come back - not even light is fast enough.`,
+    `The boundary around a black hole is called the <strong>event horizon</strong>. Cross it and you can never come back, not even light is fast enough.`,
     `If you fell into a black hole feet-first, you'd be stretched out into a long noodle by the gravity difference between your feet and your head. Scientists actually call this <strong>"spaghettification."</strong>`,
     `Time slows down near a black hole. Someone falling in would seem to <strong>freeze in slow motion</strong> from your point of view, never quite reaching the edge.`,
-    `In 2019, scientists released the <strong>first-ever photo of a black hole</strong> - the supermassive one in the centre of galaxy M87, 53 million light-years away.`,
+    `In 2019, scientists released the <strong>first-ever photo of a black hole</strong>, the supermassive one in the centre of galaxy M87, 53 million light-years away.`,
     `There's a <strong>supermassive black hole</strong> at the centre of almost every galaxy, including ours. It's called <strong>Sagittarius A*</strong> and it's about <strong>4 million times</strong> the mass of the Sun.`,
-    `Black holes can <strong>spin</strong> - and the fastest ones drag space itself around with them, like a whirlpool.`,
+    `Black holes can <strong>spin</strong>, and the fastest ones drag space itself around with them, like a whirlpool.`,
   ],
   stats: {
     What: "Region where gravity beats light",
@@ -2301,6 +2301,46 @@ function exitGalaxyMode() {
   for (const [child, vis] of galaxyHiddenSnapshot) child.visible = vis;
   galaxyGroup.visible = false;
   galaxyHiddenSnapshot = null;
+  const learnBtn = document.getElementById("galaxy-learn");
+  if (learnBtn) learnBtn.hidden = true;
+}
+
+// Milky Way fact pack (used by the Learn-more panel in galaxy view)
+const MILKY_WAY_DATA = {
+  tagline: "Our home galaxy",
+  intro: [
+    `The <strong>Milky Way</strong> is the galaxy we live in. It's a giant pinwheel of around <strong>100 to 400 billion stars</strong>, all held together by gravity.`,
+    `It's a <strong>barred spiral galaxy</strong>: a bright bulge of older stars in the middle, with long curving arms of younger stars, gas and dust sweeping out from it.`,
+    `Our Sun, with all its planets including Earth, sits about <strong>26,000 light years</strong> from the centre, out on the <strong>Orion Arm</strong>. That's the yellow dot you see.`,
+    `The whole galaxy is roughly <strong>100,000 light years</strong> across. Light, the fastest thing in the universe, would still take a hundred thousand years to cross it.`,
+    `At the very centre is a <strong>supermassive black hole</strong> called <strong>Sagittarius A*</strong>, about 4 million times the mass of the Sun.`,
+    `Everything in the galaxy is spinning. The Sun takes about <strong>225 million years</strong> to make one full lap around the centre, called a <strong>galactic year</strong>.`,
+    `The Milky Way isn't alone. It's part of the <strong>Local Group</strong>, a small cluster of galaxies, and it's slowly drifting toward our giant neighbour <strong>Andromeda</strong>. The two will collide in about 4.5 billion years.`,
+  ],
+  stats: {
+    "Type": "Barred spiral galaxy",
+    "Stars": "100 to 400 billion",
+    "Width": "About 100,000 light years",
+    "Sun's distance from centre": "About 26,000 light years",
+    "One galactic year": "About 225 million Earth years",
+    "Central black hole": "Sagittarius A*",
+  },
+};
+
+function openMilkyWayInfo() {
+  if (typeof infoPanel === "undefined" || !infoPanel) return;
+  if (typeof infoTitle !== "undefined") infoTitle.textContent = "The Milky Way";
+  let html = "";
+  html += `<div class="info-tagline">${MILKY_WAY_DATA.tagline}</div>`;
+  for (const para of MILKY_WAY_DATA.intro) html += `<p>${para}</p>`;
+  html += `<div class="quick-stats mw-stats">`;
+  const entries = Object.entries(MILKY_WAY_DATA.stats);
+  for (const [k, v] of entries) {
+    html += `<div class="qs"><div class="qs-k">${k}</div><div class="qs-v">${v}</div></div>`;
+  }
+  html += `</div>`;
+  infoBody.innerHTML = html;
+  infoPanel.hidden = false;
 }
 
 function flyToGalaxyView() {
@@ -2310,6 +2350,8 @@ function flyToGalaxyView() {
   if (typeof infoPanel !== "undefined") infoPanel.hidden = true;
   if (typeof hideHotspots === "function") hideHotspots();
   enterGalaxyMode();
+  const learnBtn = document.getElementById("galaxy-learn");
+  if (learnBtn) learnBtn.hidden = false;
   camTween.fromPos.copy(camera.position);
   camTween.toPos.copy(galaxyPos);
   camTween.fromTarget.copy(controls.target);
@@ -2321,7 +2363,7 @@ function flyToGalaxyView() {
   followObj = null;
   controls.enabled = false;
   exitFeedMode();
-  showCaption("The Milky Way — our galaxy. The yellow dot is us.");
+  showCaption("The Milky Way, our galaxy. The yellow dot is us.");
   backBtn.hidden = false;
   setTimeout(() => { camTween.dur = 1.2; }, 1700);
 }
@@ -2701,7 +2743,7 @@ const QUIZZES = {
         "Lava",
       ],
       answer: 1,
-      why: "The Sun is about 73% hydrogen and 25% helium - the rest is everything else.",
+      why: "The Sun is about 73% hydrogen and 25% helium, the rest is everything else.",
     },
     {
       q: "How long does sunlight take to reach Earth?",
@@ -2718,7 +2760,7 @@ const QUIZZES = {
         "A blue supergiant",
       ],
       answer: 2,
-      why: "It\u2019s a G-type main-sequence star - a yellow dwarf - kind of medium-sized.",
+      why: "It\u2019s a G-type main-sequence star, a yellow dwarf, kind of medium-sized.",
     },
     {
       q: "Roughly how old is the Sun?",
@@ -2729,7 +2771,7 @@ const QUIZZES = {
         "100 billion years",
       ],
       answer: 2,
-      why: "About 4.6 billion years - and it\u2019s only about halfway through its life.",
+      why: "About 4.6 billion years, and it\u2019s only about halfway through its life.",
     },
     {
       q: "How hot is the Sun\u2019s surface?",
@@ -2740,7 +2782,7 @@ const QUIZZES = {
         "About 1 million°C",
       ],
       answer: 2,
-      why: "The visible surface (the photosphere) is about 5,500°C. The core is way hotter - 15 million°C.",
+      why: "The visible surface (the photosphere) is about 5,500°C. The core is way hotter, 15 million°C.",
     },
     {
       q: "What process makes the Sun shine?",
@@ -2795,7 +2837,7 @@ const QUIZZES = {
     },
     {
       q: "Mercury is the closest planet to the Sun. Is it the hottest?",
-      choices: ["Yes - it\u2019s baking", "No - Venus is hotter"],
+      choices: ["Yes, it\u2019s baking", "No, Venus is hotter"],
       answer: 1,
       why: "Venus is hotter because its thick atmosphere traps heat. Mercury has almost none.",
     },
@@ -2808,13 +2850,13 @@ const QUIZZES = {
         "Smooth ice",
       ],
       answer: 2,
-      why: "Mercury looks a lot like our Moon - gray, cratered, no atmosphere.",
+      why: "Mercury looks a lot like our Moon, gray, cratered, no atmosphere.",
     },
     {
       q: "How long is one year on Mercury?",
       choices: ["88 Earth days", "1 Earth year", "12 Earth years"],
       answer: 0,
-      why: "Mercury zips around the Sun in just 88 days - the fastest planet.",
+      why: "Mercury zips around the Sun in just 88 days, the fastest planet.",
     },
     {
       q: "How big is Mercury compared to Earth\u2019s Moon?",
@@ -2824,7 +2866,7 @@ const QUIZZES = {
         "Twice as big as Earth",
       ],
       answer: 1,
-      why: "Mercury is only slightly larger than our Moon - the smallest planet.",
+      why: "Mercury is only slightly larger than our Moon, the smallest planet.",
     },
     {
       q: "How extreme are Mercury\u2019s temperatures?",
@@ -2840,13 +2882,13 @@ const QUIZZES = {
       q: "What\u2019s the biggest crater on Mercury called?",
       choices: ["Caloris Basin", "Olympus Mons", "Tycho"],
       answer: 0,
-      why: "The Caloris Basin is about 1,550 km wide - made by a giant asteroid impact.",
+      why: "The Caloris Basin is about 1,550 km wide, made by a giant asteroid impact.",
     },
     {
       q: "Is there ice on Mercury?",
       choices: [
-        "No way - it\u2019s too hot",
-        "Yes - frozen at the poles in deep craters",
+        "No way, it\u2019s too hot",
+        "Yes, frozen at the poles in deep craters",
         "Only on the night side",
       ],
       answer: 1,
@@ -2868,7 +2910,7 @@ const QUIZZES = {
         "It\u2019s on fire",
       ],
       answer: 1,
-      why: "A runaway greenhouse effect - its CO\u2082 atmosphere holds in the Sun\u2019s heat.",
+      why: "A runaway greenhouse effect, its CO\u2082 atmosphere holds in the Sun\u2019s heat.",
     },
     {
       q: "Venus spins in which direction compared to most planets?",
@@ -2886,25 +2928,25 @@ const QUIZZES = {
       q: "What is Venus often called?",
       choices: ["Earth\u2019s twin", "The red planet", "The ringed planet"],
       answer: 0,
-      why: "Venus and Earth are similar in size, mass and density - but Venus is a much harsher place.",
+      why: "Venus and Earth are similar in size, mass and density, but Venus is a much harsher place.",
     },
     {
       q: "What rains down on Venus?",
       choices: ["Water", "Sulfuric acid", "Diamonds"],
       answer: 1,
-      why: "Venus has clouds and rain made of sulfuric acid - though the rain evaporates before hitting the ground.",
+      why: "Venus has clouds and rain made of sulfuric acid, though the rain evaporates before hitting the ground.",
     },
     {
       q: "How hot is Venus\u2019 surface?",
       choices: ["About 50°C", "About 200°C", "About 465°C"],
       answer: 2,
-      why: "About 465°C - hot enough to melt lead.",
+      why: "About 465°C, hot enough to melt lead.",
     },
     {
       q: "How is the air pressure on Venus?",
       choices: [
         "Same as Earth",
-        "90 times Earth\u2019s - like being deep underwater",
+        "90 times Earth\u2019s, like being deep underwater",
         "Almost no atmosphere",
       ],
       answer: 1,
@@ -2914,7 +2956,7 @@ const QUIZZES = {
       q: "How many moons does Venus have?",
       choices: ["0", "1", "2"],
       answer: 0,
-      why: "Zero - Venus and Mercury are the only planets with no moons.",
+      why: "Zero, Venus and Mercury are the only planets with no moons.",
     },
     {
       q: "What time of day is Venus often visible from Earth?",
@@ -2932,7 +2974,7 @@ const QUIZZES = {
       q: "What percent of Earth is covered by water?",
       choices: ["About 30%", "About 50%", "About 71%", "About 95%"],
       answer: 2,
-      why: "About 71% - that\u2019s why it looks so blue from space.",
+      why: "About 71%, that\u2019s why it looks so blue from space.",
     },
     {
       q: "Why does Earth have seasons?",
@@ -2953,7 +2995,7 @@ const QUIZZES = {
         "14 billion years",
       ],
       answer: 2,
-      why: "About 4.54 billion years - our Sun and planets formed together.",
+      why: "About 4.54 billion years, our Sun and planets formed together.",
     },
     {
       q: "What protects Earth\u2019s surface from harmful solar radiation?",
@@ -2965,13 +3007,13 @@ const QUIZZES = {
       q: "How fast does the Earth spin at the equator?",
       choices: ["About 100 km/h", "About 1,670 km/h", "About 100,000 km/h"],
       answer: 1,
-      why: "About 1,670 km/h - but you don\u2019t feel it because everything spins together.",
+      why: "About 1,670 km/h, but you don\u2019t feel it because everything spins together.",
     },
     {
       q: "What is Earth\u2019s only natural satellite?",
       choices: ["Phobos", "The Moon", "Titan"],
       answer: 1,
-      why: "The Moon - about 384,400 km away.",
+      why: "The Moon, about 384,400 km away.",
     },
     {
       q: "Where is most of Earth\u2019s fresh water locked up?",
@@ -3005,7 +3047,7 @@ const QUIZZES = {
         "A Mars-sized object hit Earth and the debris formed it",
       ],
       answer: 2,
-      why: 'The "giant impact" theory - a young Earth was smashed and the debris clumped together.',
+      why: 'The "giant impact" theory, a young Earth was smashed and the debris clumped together.',
     },
     {
       q: "How many people have walked on the Moon?",
@@ -3021,7 +3063,7 @@ const QUIZZES = {
         "Earth\u2019s atmosphere blocks the back",
       ],
       answer: 1,
-      why: 'It\u2019s "tidally locked" - its rotation matches its orbit perfectly.',
+      why: 'It\u2019s "tidally locked", its rotation matches its orbit perfectly.',
     },
     {
       q: "What causes ocean tides on Earth?",
@@ -3037,7 +3079,7 @@ const QUIZZES = {
       q: "How long does the Moon take to orbit Earth?",
       choices: ["1 day", "About 27 days", "1 year"],
       answer: 1,
-      why: "About 27.3 days - almost the same as one calendar month.",
+      why: "About 27.3 days, almost the same as one calendar month.",
     },
     {
       q: "How is the Moon changing over time?",
@@ -3047,7 +3089,7 @@ const QUIZZES = {
         "Staying exactly put",
       ],
       answer: 1,
-      why: "It\u2019s drifting away - about as fast as your fingernails grow.",
+      why: "It\u2019s drifting away, about as fast as your fingernails grow.",
     },
     {
       q: "Why are the Moon\u2019s footprints still there from 1969?",
@@ -3063,13 +3105,13 @@ const QUIZZES = {
       q: "Who was the first person to walk on the Moon?",
       choices: ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin"],
       answer: 1,
-      why: "Neil Armstrong, on July 20, 1969 - followed minutes later by Buzz Aldrin.",
+      why: "Neil Armstrong, on July 20, 1969, followed minutes later by Buzz Aldrin.",
     },
     {
       q: "About how far away is the Moon?",
       choices: ["About 38,000 km", "About 384,000 km", "About 38 million km"],
       answer: 1,
-      why: "Roughly 384,400 km - about 30 Earths could fit between us and the Moon.",
+      why: "Roughly 384,400 km, about 30 Earths could fit between us and the Moon.",
     },
   ],
   Mars: [
@@ -3081,19 +3123,19 @@ const QUIZZES = {
         "Red plants grow there",
       ],
       answer: 1,
-      why: "Iron oxide - rust - covers Mars\u2019 surface.",
+      why: "Iron oxide, rust, covers Mars\u2019 surface.",
     },
     {
       q: "How many moons does Mars have?",
       choices: ["0", "1", "2", "95"],
       answer: 2,
-      why: "Phobos and Deimos - both small, lumpy and potato-shaped.",
+      why: "Phobos and Deimos, both small, lumpy and potato-shaped.",
     },
     {
       q: "What is the biggest volcano in the solar system?",
       choices: ["Mauna Loa on Earth", "Olympus Mons on Mars", "Loki on Io"],
       answer: 1,
-      why: "Olympus Mons is about 22 km tall - almost 3 times taller than Mount Everest.",
+      why: "Olympus Mons is about 22 km tall, almost 3 times taller than Mount Everest.",
     },
     {
       q: "How long is one Mars day?",
@@ -3105,8 +3147,8 @@ const QUIZZES = {
       q: "Did Mars ever have liquid water on its surface?",
       choices: [
         "Never",
-        "Yes - billions of years ago",
-        "Yes - right now in oceans",
+        "Yes, billions of years ago",
+        "Yes, right now in oceans",
       ],
       answer: 1,
       why: "Ancient riverbeds and lake floors show Mars once had flowing water.",
@@ -3119,14 +3161,14 @@ const QUIZZES = {
         "Verona Rupes (Miranda)",
       ],
       answer: 1,
-      why: "Valles Marineris is about 4,000 km long - it would stretch across the whole USA.",
+      why: "Valles Marineris is about 4,000 km long, it would stretch across the whole USA.",
     },
     {
       q: "What gives Mars its thin pinkish sky during the day?",
       choices: [
         "Lots of oxygen",
         "Dust in the atmosphere",
-        "Nothing - it\u2019s blue like Earth",
+        "Nothing, it\u2019s blue like Earth",
       ],
       answer: 1,
       why: "Iron-rich dust suspended in the thin atmosphere tints the sky pink.",
@@ -3155,19 +3197,19 @@ const QUIZZES = {
       q: "How many moons does Jupiter have?",
       choices: ["No moons", "1 moon", "4 moons", "95+ moons"],
       answer: 3,
-      why: "At least 95 known moons - the four biggest are called the Galilean moons.",
+      why: "At least 95 known moons, the four biggest are called the Galilean moons.",
     },
     {
       q: "What is Jupiter mostly made of?",
       choices: ["Rock and metal", "Hydrogen and helium gas", "Ice and water"],
       answer: 1,
-      why: "It\u2019s a gas giant - mostly hydrogen and helium, like a tiny failed star.",
+      why: "It\u2019s a gas giant, mostly hydrogen and helium, like a tiny failed star.",
     },
     {
       q: "How long is one day on Jupiter?",
       choices: ["About 10 hours", "About 24 hours", "About a week"],
       answer: 0,
-      why: "Jupiter spins faster than any other planet - one day is just under 10 hours.",
+      why: "Jupiter spins faster than any other planet, one day is just under 10 hours.",
     },
     {
       q: "Who first spotted Jupiter\u2019s four big moons?",
@@ -3179,7 +3221,7 @@ const QUIZZES = {
       q: "How big is Jupiter compared to Earth?",
       choices: ["Same size", "About 11× wider", "About 100× wider"],
       answer: 1,
-      why: "Jupiter is about 11 times wider than Earth - and you could fit 1,300 Earths inside it.",
+      why: "Jupiter is about 11 times wider than Earth, and you could fit 1,300 Earths inside it.",
     },
     {
       q: "Which Jupiter moon is the most volcanic place in the solar system?",
@@ -3191,13 +3233,13 @@ const QUIZZES = {
       q: "Which Jupiter moon might have a hidden ocean of liquid water?",
       choices: ["Io", "Europa", "Callisto"],
       answer: 1,
-      why: "Europa\u2019s icy crust is thought to hide a salty ocean - maybe twice the water of all Earth\u2019s oceans combined.",
+      why: "Europa\u2019s icy crust is thought to hide a salty ocean, maybe twice the water of all Earth\u2019s oceans combined.",
     },
     {
       q: "Does Jupiter have rings?",
       choices: [
         "No, only Saturn does",
-        "Yes - but they\u2019re very faint and dusty",
+        "Yes, but they\u2019re very faint and dusty",
       ],
       answer: 1,
       why: "Jupiter has thin, dusty rings made of debris kicked up from its small inner moons.",
@@ -3208,13 +3250,13 @@ const QUIZZES = {
       q: "What are Saturn\u2019s rings mostly made of?",
       choices: ["Rock", "Chunks of ice", "Gas", "Plastic"],
       answer: 1,
-      why: "Mostly water ice, with some rocky bits - chunks ranging from grains to mountains.",
+      why: "Mostly water ice, with some rocky bits, chunks ranging from grains to mountains.",
     },
     {
       q: "How thick are Saturn\u2019s rings (typically)?",
       choices: ["Thinner than 1 km", "About 100 km", "About 1,000 km"],
       answer: 0,
-      why: "They\u2019re HUGE across (280,000 km wide) but usually less than 1 km thick - like a giant flat pancake.",
+      why: "They\u2019re HUGE across (280,000 km wide) but usually less than 1 km thick, like a giant flat pancake.",
     },
     {
       q: "Saturn\u2019s biggest moon, Titan, has...",
@@ -3224,7 +3266,7 @@ const QUIZZES = {
         "Active volcanoes of lava",
       ],
       answer: 1,
-      why: "Titan is the only moon with a thick atmosphere - and it has rivers and lakes of liquid methane!",
+      why: "Titan is the only moon with a thick atmosphere, and it has rivers and lakes of liquid methane!",
     },
     {
       q: "Which moon shoots water geysers from its south pole?",
@@ -3235,8 +3277,8 @@ const QUIZZES = {
     {
       q: "Could Saturn float on water (in a giant bathtub)?",
       choices: [
-        "Yes - it\u2019s less dense than water",
-        "No - it would sink instantly",
+        "Yes, it\u2019s less dense than water",
+        "No, it would sink instantly",
       ],
       answer: 0,
       why: "Saturn is less dense than water, so in theory yes! It\u2019s the only planet that would.",
@@ -3245,7 +3287,7 @@ const QUIZZES = {
       q: "How many known moons does Saturn have?",
       choices: ["1", "27", "146+"],
       answer: 2,
-      why: "At least 146 - the most of any planet in the solar system.",
+      why: "At least 146, the most of any planet in the solar system.",
     },
     {
       q: "Saturn\u2019s moon Mimas looks like what famous movie object?",
@@ -3275,7 +3317,7 @@ const QUIZZES = {
         "It\u2019s tipped on its side",
       ],
       answer: 2,
-      why: "Uranus rotates almost on its side - probably knocked over by a giant impact long ago.",
+      why: "Uranus rotates almost on its side, probably knocked over by a giant impact long ago.",
     },
     {
       q: "What gives Uranus its blue-green color?",
@@ -3287,7 +3329,7 @@ const QUIZZES = {
       q: "Uranus\u2019 moons are mostly named after characters from...",
       choices: ["Greek myths", "Shakespeare and Pope", "Egyptian gods"],
       answer: 1,
-      why: "Titania, Oberon, Puck, Miranda, Ariel - all from Shakespeare and Alexander Pope.",
+      why: "Titania, Oberon, Puck, Miranda, Ariel, all from Shakespeare and Alexander Pope.",
     },
     {
       q: "How many known moons does Uranus have?",
@@ -3313,7 +3355,7 @@ const QUIZZES = {
     },
     {
       q: "Does Uranus have rings?",
-      choices: ["No", "Yes - 13 narrow dark rings"],
+      choices: ["No", "Yes, 13 narrow dark rings"],
       answer: 1,
       why: "Uranus has 13 thin, dark rings, much fainter than Saturn\u2019s.",
     },
@@ -3321,11 +3363,11 @@ const QUIZZES = {
       q: "Who discovered Uranus?",
       choices: ["Galileo", "William Herschel in 1781", "NASA in the 1970s"],
       answer: 1,
-      why: "William Herschel spotted it in 1781 - the first planet discovered with a telescope.",
+      why: "William Herschel spotted it in 1781, the first planet discovered with a telescope.",
     },
     {
       q: "How cold can Uranus get?",
-      choices: ["Around 0°C", "About −224°C - coldest of all planets", "500°C"],
+      choices: ["Around 0°C", "About −224°C, coldest of all planets", "500°C"],
       answer: 1,
       why: "Uranus has the coldest atmosphere of any planet, getting down to about −224°C.",
     },
@@ -3335,7 +3377,7 @@ const QUIZZES = {
       q: "What\u2019s the wind speed in Neptune\u2019s storms?",
       choices: ["About 100 km/h", "About 500 km/h", "Up to 2,000 km/h"],
       answer: 2,
-      why: "Neptune has the fastest winds in the solar system - over 2,000 km/h.",
+      why: "Neptune has the fastest winds in the solar system, over 2,000 km/h.",
     },
     {
       q: "Neptune\u2019s biggest moon, Triton, does something unusual. What?",
@@ -3345,7 +3387,7 @@ const QUIZZES = {
         "Splits in half daily",
       ],
       answer: 1,
-      why: "Triton orbits backwards - it was probably a Kuiper-belt object Neptune captured.",
+      why: "Triton orbits backwards, it was probably a Kuiper-belt object Neptune captured.",
     },
     {
       q: "How was Neptune discovered?",
@@ -3355,7 +3397,7 @@ const QUIZZES = {
         "Found by an alien",
       ],
       answer: 1,
-      why: "Astronomers noticed Uranus\u2019 orbit was off, did the math, and pointed a telescope where Neptune should be - and it was there!",
+      why: "Astronomers noticed Uranus\u2019 orbit was off, did the math, and pointed a telescope where Neptune should be, and it was there!",
     },
     {
       q: "How long does Neptune take to orbit the Sun?",
@@ -3367,11 +3409,11 @@ const QUIZZES = {
       q: "How far is Neptune from the Sun, on average?",
       choices: [
         "Same as Earth",
-        "About 4.5 billion km - 30× Earth\u2019s distance",
+        "About 4.5 billion km, 30× Earth\u2019s distance",
         "About 100 light-years",
       ],
       answer: 1,
-      why: "About 4.5 billion km - sunlight takes more than 4 hours to get there.",
+      why: "About 4.5 billion km, sunlight takes more than 4 hours to get there.",
     },
     {
       q: "What gives Neptune its bright blue color?",
@@ -3385,13 +3427,13 @@ const QUIZZES = {
     },
     {
       q: "Has any spacecraft visited Neptune?",
-      choices: ["Many", "Just one - Voyager 2 in 1989", "Never"],
+      choices: ["Many", "Just one, Voyager 2 in 1989", "Never"],
       answer: 1,
-      why: "Only Voyager 2 has flown by Neptune - back in 1989.",
+      why: "Only Voyager 2 has flown by Neptune, back in 1989.",
     },
     {
       q: "Does Neptune have rings?",
-      choices: ["No", "Yes - 5 faint rings"],
+      choices: ["No", "Yes, 5 faint rings"],
       answer: 1,
       why: "Neptune has 5 dark, dusty rings discovered when Voyager 2 flew by.",
     },
@@ -3399,7 +3441,7 @@ const QUIZZES = {
       q: 'What\u2019s Neptune\u2019s "Great Dark Spot"?',
       choices: ["A continent", "A giant storm system", "An impact crater"],
       answer: 1,
-      why: "A massive storm in Neptune\u2019s atmosphere - similar to Jupiter\u2019s Red Spot but they come and go.",
+      why: "A massive storm in Neptune\u2019s atmosphere, similar to Jupiter\u2019s Red Spot but they come and go.",
     },
   ],
   Pluto: [
@@ -3417,7 +3459,7 @@ const QUIZZES = {
         "Bigger than Pluto",
       ],
       answer: 1,
-      why: "Charon is so big they almost orbit each other - like a double dwarf-planet.",
+      why: "Charon is so big they almost orbit each other, like a double dwarf-planet.",
     },
     {
       q: "What is on Pluto\u2019s surface?",
@@ -3445,7 +3487,7 @@ const QUIZZES = {
       q: "How long is a year on Pluto?",
       choices: ["1 Earth year", "About 248 Earth years", "1,000 Earth years"],
       answer: 1,
-      why: "Pluto takes about 248 Earth years to orbit the Sun - once.",
+      why: "Pluto takes about 248 Earth years to orbit the Sun, once.",
     },
     {
       q: "Why is Pluto no longer a planet?",
@@ -3467,7 +3509,7 @@ const QUIZZES = {
       q: "How big is Pluto compared to Earth\u2019s Moon?",
       choices: ["Bigger than the Moon", "Smaller than the Moon", "Same size"],
       answer: 1,
-      why: "Pluto is smaller than our Moon - about 2,377 km wide.",
+      why: "Pluto is smaller than our Moon, about 2,377 km wide.",
     },
   ],
   "Black hole": [
@@ -3485,17 +3527,17 @@ const QUIZZES = {
         "A type of telescope",
       ],
       answer: 1,
-      why: "Cross the event horizon and you can never come back - gravity is too strong.",
+      why: "Cross the event horizon and you can never come back, gravity is too strong.",
     },
     {
       q: "If you fell into a black hole feet-first, what would happen?",
       choices: [
-        "Nothing - you\u2019d be fine",
+        "Nothing, you\u2019d be fine",
         "You\u2019d be stretched into a long noodle",
         "You\u2019d bounce out",
       ],
       answer: 1,
-      why: "Scientists call it spaghettification - gravity pulls your feet way harder than your head.",
+      why: "Scientists call it spaghettification, gravity pulls your feet way harder than your head.",
     },
     {
       q: "How do most black holes form?",
@@ -3515,7 +3557,7 @@ const QUIZZES = {
         "Empty space",
       ],
       answer: 1,
-      why: "Most big galaxies - including our Milky Way - have a supermassive black hole at their core.",
+      why: "Most big galaxies, including our Milky Way, have a supermassive black hole at their core.",
     },
     {
       q: "What\u2019s the supermassive black hole at the centre of our galaxy called?",
@@ -3527,7 +3569,7 @@ const QUIZZES = {
       q: "What is the swirling disc of glowing matter around a black hole called?",
       choices: ["Photon ring", "Accretion disc", "Solar flare"],
       answer: 1,
-      why: "The accretion disc is gas and dust spiralling in - it gets so hot it glows brightly.",
+      why: "The accretion disc is gas and dust spiralling in, it gets so hot it glows brightly.",
     },
     {
       q: "What happens to time near a black hole (from far away)?",
@@ -3549,7 +3591,7 @@ const QUIZZES = {
         "Hawking in 1990",
       ],
       answer: 1,
-      why: "They came out of Einstein\u2019s 1915 theory - though he didn\u2019t fully believe they\u2019d really exist.",
+      why: "They came out of Einstein\u2019s 1915 theory, though he didn\u2019t fully believe they\u2019d really exist.",
     },
   ],
 };
@@ -3613,9 +3655,9 @@ function renderQuiz() {
       msg = `Perfect! You got <strong>${s.score} / ${total}</strong>. You\u2019re a ${s.name} expert.`;
       burstConfetti();
     } else if (s.score >= total - 1)
-      msg = `Awesome - <strong>${s.score} / ${total}</strong>! You really know your stuff.`;
+      msg = `Awesome, <strong>${s.score} / ${total}</strong>! You really know your stuff.`;
     else if (s.score >= Math.ceil(total / 2))
-      msg = `Nice work - <strong>${s.score} / ${total}</strong>. Read the panel and try again!`;
+      msg = `Nice work, <strong>${s.score} / ${total}</strong>. Read the panel and try again!`;
     else
       msg = `<strong>${s.score} / ${total}</strong>. Tricky! Read the facts and beat your score.`;
     quizBody.innerHTML = `
@@ -3944,7 +3986,7 @@ const LAYERS = {
   ],
   Mercury: [
     { name: "Inner core",      outerFrac: 0.30,  color: "#c8ad8c", desc: "Solid iron at the very centre, about the size of our Moon." },
-    { name: "Outer core",      outerFrac: 0.85,  color: "#d4af7a", desc: "Molten iron. Mercury's metal heart is huge — it takes up about 80% of the planet." },
+    { name: "Outer core",      outerFrac: 0.85,  color: "#d4af7a", desc: "Molten iron. Mercury's metal heart is huge, it takes up about 80% of the planet." },
     { name: "Mantle",          outerFrac: 0.97,  color: "#9b8466", desc: "A thin shell of rock wrapped around the giant core." },
     { name: "Crust",           outerFrac: 1.0,   color: "#7d6b54", desc: "Cratered grey surface with tall cliffs from when the planet shrank as it cooled." },
   ],
@@ -3954,7 +3996,7 @@ const LAYERS = {
     { name: "Crust",           outerFrac: 1.0,   color: "#a87a3a", desc: "Thin volcanic crust hiding under a crushing toxic atmosphere." },
   ],
   Earth: [
-    { name: "Inner core",      outerFrac: 0.19,  color: "#fff0c2", desc: "Solid iron-nickel ball, as hot as the Sun's surface — about 5,400 °C." },
+    { name: "Inner core",      outerFrac: 0.19,  color: "#fff0c2", desc: "Solid iron-nickel ball, as hot as the Sun's surface, about 5,400 °C." },
     { name: "Outer core",      outerFrac: 0.55,  color: "#ff9a3c", desc: "Swirling liquid iron. Its motion creates Earth's magnetic field, the thing that makes compasses work." },
     { name: "Mantle",          outerFrac: 0.996, color: "#c54a2c", desc: "Hot, slow-flowing rock. It moves the continents over millions of years." },
     { name: "Crust",           outerFrac: 1.0,   color: "#6f8e4e", desc: "The thin rocky shell we live on. Compared to the whole planet it's thinner than an apple peel." },
@@ -3990,10 +4032,10 @@ const LAYERS = {
   Neptune: [
     { name: "Core region", outerFrac: 0.20, color: "#2a3b5b", desc: "Earth-sized core of rock and ice." },
     { name: "Icy mantle",  outerFrac: 0.85, color: "#4a7ac8", desc: "Super-hot dense ice soup. Some scientists think it might actually rain diamonds inside." },
-    { name: "Atmosphere",  outerFrac: 1.0,  color: "#5b8de8", desc: "Methane gives Neptune its deep blue, and the fastest winds in the solar system — over 2,000 km/h." },
+    { name: "Atmosphere",  outerFrac: 1.0,  color: "#5b8de8", desc: "Methane gives Neptune its deep blue, and the fastest winds in the solar system, over 2,000 km/h." },
   ],
   Pluto: [
-    { name: "Rocky core",          outerFrac: 0.70, color: "#6e5340", desc: "A big rocky heart — about 70% of Pluto's size." },
+    { name: "Rocky core",          outerFrac: 0.70, color: "#6e5340", desc: "A big rocky heart, about 70% of Pluto's size." },
     { name: "Water-ice mantle",    outerFrac: 0.96, color: "#a8c0d8", desc: "There might even be a hidden liquid water ocean hiding under the ice." },
     { name: "Nitrogen ice crust",  outerFrac: 1.0,  color: "#e4d6c4", desc: "Frozen nitrogen and methane. The famous heart-shaped Tombaugh Regio lives here." },
   ],
@@ -4081,7 +4123,7 @@ function openSection(section) {
       });
       html += `</ul>`;
     } else {
-      html += `<p class="sp-p">No fun facts yet — check back soon.</p>`;
+      html += `<p class="sp-p">No fun facts yet, check back soon.</p>`;
     }
   } else if (section === "stats") {
     if (data.stats && Object.keys(data.stats).length) {
@@ -4853,11 +4895,20 @@ pickObject = function (obj) {
 // Galaxy view button
 (function wireGalaxy() {
   const btn = document.getElementById("galaxy-btn");
-  if (!btn) return;
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    flyToGalaxyView();
-  });
+  if (btn) btn.addEventListener("click", (e) => { e.stopPropagation(); flyToGalaxyView(); });
+
+  const learn = document.getElementById("galaxy-learn");
+  if (learn) {
+    learn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openMilkyWayInfo();
+    });
+    learn.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+
+  // Don't let clicks on the info panel close the galaxy view
+  const ip = document.getElementById("info-panel");
+  if (ip) ip.addEventListener("pointerdown", (e) => e.stopPropagation());
 })();
 
 // Re-wire the "Visit every planet" mission card to start the tour
