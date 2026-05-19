@@ -2377,10 +2377,7 @@ function pickObject(obj) {
     infoToggle.hidden = true;
     infoPanel.hidden = true;
   }
-  // Wait for camera fly-in before showing the playful hotspots
-  setTimeout(() => {
-    if (zoomedOn === obj) showHotspotsForCurrent();
-  }, 900);
+  // Hotspots are hidden by default — user reveals them via the Explore button
   if (obj.userData.isBlackHole) {
     setTimeout(() => {
       if (zoomedOn === obj) enterFeedMode();
@@ -3512,12 +3509,28 @@ function openInfo() {
   if (data) {
     if (data.tagline) html += `<div class="info-tagline">${data.tagline}</div>`;
     if (data.image) {
-      html += `<img class="info-img" src="${data.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='none')" />`;
+      html += `<img class="info-img" src="${data.image}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling&&this.nextElementSibling.classList.contains('info-credit')&&(this.nextElementSibling.style.display='none')" />`;
       if (data.credit) html += `<div class="info-credit">${data.credit}</div>`;
     }
-    // Just the first intro paragraph as a teaser
-    if (data.intro && data.intro[0]) html += `<p>${data.intro[0]}</p>`;
-    html += `<div class="info-hint">Tap the dots around ${name} for more!</div>`;
+    // Show every intro paragraph so the description is richer
+    for (const para of data.intro || []) {
+      html += `<p>${para}</p>`;
+    }
+    // Quick-stat strip if we have stats
+    if (data.stats && Object.keys(data.stats).length) {
+      const entries = Object.entries(data.stats).slice(0, 3);
+      html += `<div class="quick-stats">`;
+      for (const [k, v] of entries) {
+        html += `<div class="qs"><div class="qs-v">${v}</div><div class="qs-k">${k}</div></div>`;
+      }
+      html += `</div>`;
+    }
+    html += `<button type="button" class="explore-btn" id="explore-cta">
+      <span class="explore-spark">✦</span>
+      <span>Explore ${name}!</span>
+      <span class="explore-spark">✦</span>
+    </button>`;
+    html += `<div class="info-hint">Press the colourful pills around ${name} to dig in.</div>`;
   } else {
     html = zoomedOn.userData.details || "";
   }
@@ -3531,6 +3544,14 @@ function openInfo() {
       e.stopPropagation();
       openQuiz(quizBtn.dataset.quiz);
     });
+  const exploreBtn = infoBody.querySelector("#explore-cta");
+  if (exploreBtn) {
+    exploreBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeInfo();
+      showHotspotsForCurrent();
+    });
+  }
   infoPanel.hidden = false;
 }
 function closeInfo() {
@@ -3602,43 +3623,108 @@ function updateHotspots() {
   }
 }
 
+// Section visual config (icon SVG + header gradient + accent color)
+const SECTION_META = {
+  about: {
+    label: "About",
+    accent: "#5b8cff",
+    grad: "linear-gradient(135deg, #5b8cff 0%, #7a5cff 100%)",
+    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 5 H 10.5 a2 2 0 0 1 1.5 1.5 V 20 a1.5 1.5 0 0 0-1.5-1.5 H 4 Z M 20 5 H 13.5 A 2 2 0 0 0 12 6.5 V 20 a 1.5 1.5 0 0 1 1.5-1.5 H 20 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  },
+  facts: {
+    label: "Wow facts",
+    accent: "#c870ff",
+    grad: "linear-gradient(135deg, #c870ff 0%, #ff5fa2 100%)",
+    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2.5 L14.4 8.6 L21 9.1 L16 13.2 L17.6 19.5 L12 16.2 L6.4 19.5 L8 13.2 L3 9.1 L9.6 8.6 Z" fill="currentColor"/></svg>',
+  },
+  stats: {
+    label: "By the numbers",
+    accent: "#27d4b6",
+    grad: "linear-gradient(135deg, #27d4b6 0%, #2bb7ff 100%)",
+    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="13" width="4" height="8" rx="1" fill="currentColor"/><rect x="10" y="8" width="4" height="13" rx="1" fill="currentColor"/><rect x="17" y="4" width="4" height="17" rx="1" fill="currentColor"/></svg>',
+  },
+};
+
+// Palette for fact cards (cycled)
+const FACT_PALETTE = [
+  ["#ff7ab6", "#ff4b88"],
+  ["#7ab6ff", "#4b6dff"],
+  ["#ffd166", "#ff9a3c"],
+  ["#5bd4ff", "#27a1ff"],
+  ["#a78bfa", "#7c4dff"],
+  ["#5be4a2", "#27c878"],
+  ["#ff8a73", "#ff5a3c"],
+  ["#67e8f9", "#0ea5e9"],
+];
+
+// Emoji-free section heading helper
+function sectionHeaderHTML(section, subtitle) {
+  const meta = SECTION_META[section];
+  return `<div class="sp-header" style="background:${meta.grad};">
+    <span class="sp-header-icon">${meta.icon}</span>
+    <div class="sp-header-titles">
+      <div class="sp-header-title">${meta.label}</div>
+      <div class="sp-header-sub">${subtitle}</div>
+    </div>
+  </div>`;
+}
+
 function openSection(section) {
   if (!zoomedOn) return;
   const data = zoomedOn.userData.detailsData;
   if (!data) return;
-  let title = "";
-  let html = "";
+  const name = zoomedOn.userData.name || "";
+  sectionPop.dataset.section = section;
+  let html = sectionHeaderHTML(section, name);
+  html += `<div class="sp-content">`;
   if (section === "about") {
-    title = "About " + (zoomedOn.userData.name || "");
-    if (data.tagline) html += `<p style="color:rgba(255,255,255,0.65);font-size:13px;">${data.tagline}</p>`;
-    for (const para of data.intro || []) html += `<p>${para}</p>`;
+    if (data.tagline) html += `<p class="sp-tagline">${data.tagline}</p>`;
+    if (data.image) {
+      html += `<img class="sp-img" src="${data.image}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'" />`;
+    }
+    for (const para of data.intro || []) html += `<p class="sp-p">${para}</p>`;
+    if (!(data.intro && data.intro.length)) html += `<p class="sp-p">No description yet.</p>`;
   } else if (section === "facts") {
-    title = "Wow facts";
     if (data.facts && data.facts.length) {
-      html += "<ul>";
-      for (const f of data.facts) html += `<li>${f}</li>`;
-      html += "</ul>";
+      html += `<div class="facts-grid">`;
+      data.facts.forEach((f, i) => {
+        const [c1, c2] = FACT_PALETTE[i % FACT_PALETTE.length];
+        const rot = ((i % 2) ? 1 : -1) * (0.6 + (i % 3) * 0.3);
+        html += `<div class="fact-card" style="--c1:${c1};--c2:${c2};--rot:${rot}deg;--d:${i * 70}ms;">
+          <div class="fact-num">${i + 1}</div>
+          <div class="fact-text">${f}</div>
+        </div>`;
+      });
+      html += `</div>`;
     } else {
-      html = "<p>No facts yet.</p>";
+      html += `<p class="sp-p">No fun facts yet — check back soon!</p>`;
     }
   } else if (section === "stats") {
-    title = "By the numbers";
     if (data.stats && Object.keys(data.stats).length) {
-      html += "<dl>";
-      for (const [k, v] of Object.entries(data.stats)) html += `<dt>${k}</dt><dd>${v}</dd>`;
-      html += "</dl>";
+      html += `<div class="stats-grid">`;
+      Object.entries(data.stats).forEach(([k, v], i) => {
+        const [c1, c2] = FACT_PALETTE[(i + 3) % FACT_PALETTE.length];
+        html += `<div class="stat-tile" style="--c1:${c1};--c2:${c2};--d:${i * 60}ms;">
+          <div class="stat-v">${v}</div>
+          <div class="stat-k">${k}</div>
+        </div>`;
+      });
+      html += `</div>`;
     } else {
-      html = "<p>No stats.</p>";
+      html += `<p class="sp-p">No numbers to show.</p>`;
     }
   }
-  sectionPopTitle.textContent = title;
-  sectionPopBody.innerHTML = html;
+  html += `</div>`;
+  sectionPop.innerHTML = `<button id="section-pop-close" class="section-pop-close" type="button" aria-label="Close">×</button>${html}`;
+  // Re-bind close button (it was overwritten by innerHTML)
+  const closeBtn = sectionPop.querySelector("#section-pop-close");
+  if (closeBtn) closeBtn.addEventListener("click", closeSectionPop);
   sectionPop.hidden = false;
   // Position the popup: prefer left of the body, else right, else center
   const info = bodyScreenInfo(zoomedOn);
   if (info) {
-    const popW = sectionPop.offsetWidth || 360;
-    const popH = sectionPop.offsetHeight || 320;
+    const popW = sectionPop.offsetWidth || 380;
+    const popH = sectionPop.offsetHeight || 360;
     let left = info.x - info.r - popW - 24;
     if (left < 16) left = info.x + info.r + 24;
     if (left + popW > window.innerWidth - 16) left = Math.max(16, (window.innerWidth - popW) / 2);
@@ -3646,6 +3732,7 @@ function openSection(section) {
     if (top + popH > window.innerHeight - 16) top = Math.max(16, window.innerHeight - popH - 16);
     sectionPop.style.left = left + "px";
     sectionPop.style.top = top + "px";
+    sectionPop.style.transform = "";
   } else {
     sectionPop.style.left = "50%";
     sectionPop.style.top = "50%";
