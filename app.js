@@ -3718,21 +3718,31 @@ function renderQuizSplash() {
   quizProgressFill.style.width = "0%";
   const total = s.questions.length;
   const palette = QUIZ_PALETTE[s.name] || QUIZ_PALETTE.default;
+  quizOverlay.classList.add("is-intro");
+  const planetClass = `qs-planet ${PLANET_FEATURE_CLASS[s.name] || ""}`.trim();
+  const titleLetters = s.name
+    .split("")
+    .map((ch, i) => `<span class="ql" style="--i:${i}">${ch === " " ? "&nbsp;" : ch}</span>`)
+    .join("");
   quizBody.innerHTML = `
- <div class="quiz-splash">
+ <div class="quiz-intro-stage">
+ <div class="qi-stars" aria-hidden="true">${
+    Array.from({ length: 28 }, (_, i) => `<span class="qi-star qi-s${i}"></span>`).join("")
+  }</div>
+ <div class="qi-shoot qi-shoot-1" aria-hidden="true"></div>
+ <div class="qi-shoot qi-shoot-2" aria-hidden="true"></div>
+
  <div class="quiz-scene" aria-hidden="true" style="--p1:${palette.p1};--p2:${palette.p2};--p3:${palette.p3};--accent:${palette.accent};">
- <span class="qs-star qs-star-1"></span>
- <span class="qs-star qs-star-2"></span>
- <span class="qs-star qs-star-3"></span>
- <span class="qs-star qs-star-4"></span>
- <span class="qs-star qs-star-5"></span>
- <span class="qs-star qs-star-6"></span>
- <span class="qs-planet"></span>
+ <span class="${planetClass}">
+ <span class="qs-spot"></span>
+ <span class="qs-band qs-band-a"></span>
+ <span class="qs-band qs-band-b"></span>
+ </span>
  <span class="qs-ring"></span>
  <span class="qs-rocket">
- <svg viewBox="0 0 32 64" width="34" height="64" aria-hidden="true">
- <path d="M16 2 C 11 10 8 18 8 28 L 8 44 L 24 44 L 24 28 C 24 18 21 10 16 2 Z" fill="#f4f4f8" stroke="#c0c4d6" stroke-width="1"/>
- <circle cx="16" cy="22" r="3.4" fill="#7adfff" stroke="#1a3a6b" stroke-width="0.8"/>
+ <svg viewBox="0 0 32 64" width="46" height="86" aria-hidden="true">
+ <path d="M16 2 C 11 10 8 18 8 28 L 8 44 L 24 44 L 24 28 C 24 18 21 10 16 2 Z" fill="#f4f4f8"/>
+ <circle cx="16" cy="22" r="3.4" fill="#7adfff"/>
  <path d="M8 38 L 4 48 L 8 44 Z M 24 38 L 28 48 L 24 44 Z" fill="#d94848"/>
  <path d="M11 44 L 11 50 L 16 56 L 21 50 L 21 44 Z" fill="#ffb650"/>
  <path d="M13 50 L 16 60 L 19 50 Z" fill="#fff3c2"/>
@@ -3740,24 +3750,41 @@ function renderQuizSplash() {
  <span class="qs-flame"></span>
  </span>
  </div>
- <h4 class="quiz-splash-title">${s.name} quiz</h4>
- <p class="quiz-splash-sub">${total} question${total === 1 ? "" : "s"}, no time limit, just fun.</p>
- <button type="button" class="quiz-btn quiz-start-btn" id="quiz-start">
+
+ <h2 class="quiz-intro-title">${titleLetters}<span class="ql-quiz">quiz</span></h2>
+ <p class="quiz-intro-sub">${total} question${total === 1 ? "" : "s"}, no time limit, just fun.</p>
+ <button type="button" class="quiz-intro-cta" id="quiz-start">
  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
  <path d="M8 1.5 C 5.8 4 4.8 6.4 4.8 8.8 L 4.8 10.6 L 6.2 10.6 L 6.2 12 L 4.2 13.4 L 5.2 13.9 L 6.2 13.2 L 6.8 13.9 L 8 13 L 9.2 13.9 L 9.8 13.2 L 10.8 13.9 L 11.8 13.4 L 9.8 12 L 9.8 10.6 L 11.2 10.6 L 11.2 8.8 C 11.2 6.4 10.2 4 8 1.5 Z" fill="currentColor"/>
  </svg>
- Blast off
+ Tap to launch
  </button>
  </div>`;
   const startBtn = document.getElementById("quiz-start");
   if (startBtn) {
     startBtn.addEventListener("click", () => {
       s.started = true;
+      quizOverlay.classList.remove("is-intro");
       runCountdownThen(() => renderQuiz());
     });
     setTimeout(() => startBtn.focus(), 50);
   }
 }
+
+// Solid-colour feature class per planet so the splash planet has character
+const PLANET_FEATURE_CLASS = {
+  Sun:     "qp-sun",
+  Mercury: "qp-mercury",
+  Venus:   "qp-venus",
+  Earth:   "qp-earth",
+  Moon:    "qp-moon",
+  Mars:    "qp-mars",
+  Jupiter: "qp-jupiter",
+  Saturn:  "qp-saturn",
+  Uranus:  "qp-uranus",
+  Neptune: "qp-neptune",
+  Pluto:   "qp-pluto",
+};
 
 // Per-quiz colour palette for the splash scene
 const QUIZ_PALETTE = {
@@ -3801,6 +3828,7 @@ function runCountdownThen(after) {
 
 function closeQuiz() {
   if (quizState) quizState.aborted = true;
+  quizOverlay.classList.remove("is-intro");
   quizOverlay.hidden = true;
   quizState = null;
 }
