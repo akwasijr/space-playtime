@@ -2376,6 +2376,93 @@ function flyToGalaxyView() {
 
 // --- Astronaut view from the ISS ---
 let issMode = false;
+const ISS_FACTS = [
+  "Up here you see 16 sunrises and 16 sunsets every Earth day.",
+  "Astronauts on the ISS grow a little taller, sometimes 5 cm, because there's no gravity squashing them.",
+  "All your water has been peed before. The ISS recycles about 98% of its water from sweat, breath and yes, urine.",
+  "Sleeping in space means strapping yourself into a sleeping bag so you don't float into the walls.",
+  "The whole station laps Earth once every 90 minutes.",
+  "Astronauts have to exercise about 2 hours every day or their muscles get weak from no gravity.",
+  "Salt and pepper come as liquids on the ISS, so they don't float into someone's eye.",
+  "The ISS is the third brightest thing in the night sky after the Sun and Moon. You can spot it from your back garden.",
+  "Tears in space don't fall. They wobble around your eyes in a little ball.",
+  "The special Cupola window has seven panes, so astronauts can stare down at Earth all day.",
+  "Astronauts say space smells like seared steak, hot metal and welding fumes.",
+  "The ISS is about the size of an American football field, including its giant solar panels.",
+  "More than 270 people from 21 different countries have visited the ISS.",
+  "There's no up or down in space. Astronauts pick a 'wall' and call it the floor.",
+];
+
+let issIntervals = [];
+let issFactIdx = 0;
+
+function startIssAnimations() {
+  stopIssAnimations();
+  const speedEl = document.getElementById("iss-speed");
+  const altEl = document.getElementById("iss-alt");
+  const sunEl = document.getElementById("iss-sunrises");
+  const factEl = document.getElementById("iss-fact-text");
+  const factWrap = document.getElementById("iss-fact");
+  // Speed flicker around real ISS speed
+  if (speedEl) {
+    issIntervals.push(setInterval(() => {
+      const v = 27500 + Math.round(Math.random() * 220);
+      speedEl.textContent = v.toLocaleString();
+    }, 1400));
+  }
+  // Altitude drift
+  if (altEl) {
+    issIntervals.push(setInterval(() => {
+      altEl.textContent = String(406 + Math.round(Math.random() * 5));
+    }, 2200));
+  }
+  // Sunrises counter, increment one every 7s, cycle back to 0 after 16
+  let sunrises = 0;
+  if (sunEl) sunEl.textContent = "0";
+  issIntervals.push(setInterval(() => {
+    sunrises = sunrises >= 16 ? 0 : sunrises + 1;
+    if (sunEl) sunEl.textContent = String(sunrises);
+  }, 7000));
+  // Fact cycler with fade
+  issFactIdx = Math.floor(Math.random() * ISS_FACTS.length);
+  if (factEl) factEl.textContent = ISS_FACTS[issFactIdx];
+  issIntervals.push(setInterval(() => {
+    if (!factWrap || !factEl) return;
+    factWrap.classList.add("is-fading");
+    setTimeout(() => {
+      issFactIdx = (issFactIdx + 1) % ISS_FACTS.length;
+      factEl.textContent = ISS_FACTS[issFactIdx];
+      factWrap.classList.remove("is-fading");
+    }, 320);
+  }, 7500));
+}
+
+function stopIssAnimations() {
+  for (const id of issIntervals) clearInterval(id);
+  issIntervals = [];
+}
+
+function takeIssPhoto() {
+  const flash = document.getElementById("iss-flash");
+  const toast = document.getElementById("iss-toast");
+  if (flash) {
+    flash.hidden = false;
+    flash.classList.remove("is-on");
+    void flash.offsetWidth;
+    flash.classList.add("is-on");
+    setTimeout(() => { flash.hidden = true; flash.classList.remove("is-on"); }, 440);
+  }
+  if (toast) {
+    toast.hidden = false;
+    toast.classList.remove("is-show");
+    void toast.offsetWidth;
+    toast.classList.add("is-show");
+    setTimeout(() => { toast.classList.remove("is-show"); }, 1800);
+    setTimeout(() => { toast.hidden = true; }, 2100);
+  }
+  if (navigator.vibrate) { try { navigator.vibrate(18); } catch (_) {} }
+}
+
 function enterIssMode() {
   if (issMode) return;
   if (!issSatRef) return;
@@ -2391,27 +2478,28 @@ function enterIssMode() {
   followObj = null;
   camTween.active = false;
   controls.enabled = false;
-  // Force the Earth-orbital scene to render even from far away
   earthOrbital.visible = true;
   issMode = true;
-  const hud = document.getElementById("iss-hud");
-  const exit = document.getElementById("iss-exit");
-  if (hud) hud.hidden = false;
-  if (exit) exit.hidden = false;
-  // Hide hint, top-bar, minimap while inside the station
+  const ids = ["iss-hud", "iss-exit", "iss-astronaut", "iss-fact", "iss-photo"];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = false;
+  }
   document.body.classList.add("iss-mode");
-  showCaption("Astronaut view, looking out from the International Space Station.");
+  startIssAnimations();
+  showCaption("Looking out from the International Space Station.");
 }
 
 function exitIssMode() {
   if (!issMode) return;
   issMode = false;
-  const hud = document.getElementById("iss-hud");
-  const exit = document.getElementById("iss-exit");
-  if (hud) hud.hidden = true;
-  if (exit) exit.hidden = true;
+  const ids = ["iss-hud", "iss-exit", "iss-astronaut", "iss-fact", "iss-photo", "iss-flash", "iss-toast"];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = true;
+  }
   document.body.classList.remove("iss-mode");
-  // Fly back to a nice Earth-view position
+  stopIssAnimations();
   const earthPos = new THREE.Vector3();
   earth.getWorldPosition(earthPos);
   const back = new THREE.Vector3(0, 6, 18).add(earthPos);
@@ -5148,6 +5236,7 @@ pickObject = function (obj) {
 (function wireIss() {
   const enter = document.getElementById("iss-btn");
   const exit = document.getElementById("iss-exit");
+  const photo = document.getElementById("iss-photo");
   if (enter) {
     enter.addEventListener("click", (e) => { e.stopPropagation(); enterIssMode(); });
     enter.addEventListener("pointerdown", (e) => e.stopPropagation());
@@ -5155,6 +5244,10 @@ pickObject = function (obj) {
   if (exit) {
     exit.addEventListener("click", (e) => { e.stopPropagation(); exitIssMode(); });
     exit.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+  if (photo) {
+    photo.addEventListener("click", (e) => { e.stopPropagation(); takeIssPhoto(); });
+    photo.addEventListener("pointerdown", (e) => e.stopPropagation());
   }
 })();
 

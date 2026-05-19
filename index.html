@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Space</title>
-<link rel="stylesheet" href="styles.css?v=38" />
+<link rel="stylesheet" href="styles.css?v=39" />
 <script type="importmap">
 {
   "imports": {
@@ -188,9 +188,58 @@
   </div>
 
   <div id="iss-hud" class="iss-hud" hidden>
-    <div class="iss-hud-line">Astronaut view, International Space Station</div>
-    <div class="iss-hud-sub">orbiting Earth at about 28,000 km/h, 400 km up</div>
+    <div class="iss-hud-card">
+      <div class="iss-hud-label">Speed</div>
+      <div class="iss-hud-row"><span class="iss-hud-val" id="iss-speed">27,600</span><span class="iss-hud-unit">km/h</span></div>
+    </div>
+    <div class="iss-hud-card">
+      <div class="iss-hud-label">Altitude</div>
+      <div class="iss-hud-row"><span class="iss-hud-val" id="iss-alt">408</span><span class="iss-hud-unit">km</span></div>
+    </div>
+    <div class="iss-hud-card">
+      <div class="iss-hud-label">Sunrises today</div>
+      <div class="iss-hud-row"><span class="iss-hud-val" id="iss-sunrises">0</span><span class="iss-hud-unit">of 16</span></div>
+    </div>
   </div>
+
+  <div id="iss-astronaut" class="iss-astronaut" hidden aria-hidden="true">
+    <svg viewBox="0 0 100 140" width="86" height="120">
+      <ellipse cx="50" cy="138" rx="22" ry="3" fill="rgba(0,0,0,0.25)"/>
+      <circle cx="50" cy="36" r="22" fill="#f4f4f8"/>
+      <ellipse cx="50" cy="34" rx="14" ry="12" fill="#1a1a2e"/>
+      <ellipse cx="46" cy="30" rx="6" ry="5" fill="#7adfff"/>
+      <ellipse cx="44" cy="28" rx="2" ry="1.5" fill="#ffffff" opacity="0.85"/>
+      <path d="M30 56 Q 30 50 36 50 L 64 50 Q 70 50 70 56 L 70 100 Q 70 108 62 108 L 38 108 Q 30 108 30 100 Z" fill="#f4f4f8"/>
+      <rect x="42" y="62" width="16" height="12" rx="2" fill="#c8d4e8"/>
+      <rect x="42" y="62" width="16" height="2" fill="#d94848"/>
+      <circle cx="46" cy="70" r="1.2" fill="#2e7a4d"/>
+      <circle cx="54" cy="70" r="1.2" fill="#ffc04d"/>
+      <path d="M30 58 Q 18 40 14 18 L 20 14 Q 26 38 38 56 Z" fill="#f4f4f8" class="iss-arm-wave"/>
+      <circle cx="14" cy="16" r="4.5" fill="#f4f4f8"/>
+      <path d="M70 58 Q 78 70 80 90 L 76 92 Q 72 76 64 64 Z" fill="#f4f4f8"/>
+      <rect x="34" y="100" width="12" height="32" rx="4" fill="#f4f4f8"/>
+      <rect x="54" y="100" width="12" height="32" rx="4" fill="#f4f4f8"/>
+      <rect x="32" y="128" width="16" height="8" rx="2" fill="#1a1a2e"/>
+      <rect x="52" y="128" width="16" height="8" rx="2" fill="#1a1a2e"/>
+    </svg>
+  </div>
+
+  <div id="iss-fact" class="iss-fact" hidden>
+    <span class="iss-fact-tag">Did you know?</span>
+    <span class="iss-fact-text" id="iss-fact-text"></span>
+  </div>
+
+  <button id="iss-photo" class="iss-photo" type="button" hidden aria-label="Take a photo">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M5 8 L 8.5 8 L 10 6 L 14 6 L 15.5 8 L 19 8 Q 21 8 21 10 L 21 17 Q 21 19 19 19 L 5 19 Q 3 19 3 17 L 3 10 Q 3 8 5 8 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="13.5" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    </svg>
+    <span>Photo</span>
+  </button>
+
+  <div id="iss-flash" class="iss-flash" hidden></div>
+  <div id="iss-toast" class="iss-toast" hidden>Photo saved!</div>
+
   <button id="iss-exit" class="iss-exit" type="button" hidden>
     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
       <path d="M10 3 L 5 8 L 10 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -265,6 +314,6 @@
     </svg>
   </div>
 
-  <script type="module" src="app.js?v=38"></script>
+  <script type="module" src="app.js?v=39"></script>
 </body>
 </html>
