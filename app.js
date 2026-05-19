@@ -2289,6 +2289,8 @@ function enterGalaxyMode() {
     child.visible = false;
   }
   galaxyGroup.visible = true;
+  // Lock view so the galaxy stays centred and visible
+  controls.enabled = false;
   // Hide UI bits that don't make sense in this view
   if (typeof hotspotsEl !== "undefined" && hotspotsEl) hotspotsEl.hidden = true;
   if (typeof sectionPop !== "undefined" && sectionPop) sectionPop.hidden = true;
@@ -2511,7 +2513,7 @@ const clock = new THREE.Clock();
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
 
-  // Galaxy view: slow rotate + pulse "you are here" halo
+  // Galaxy view: slow rotate + pulse "you are here" halo, lock camera in place
   if (galaxyGroup.visible) {
     galaxyGroup.rotation.y += dt * 0.04;
     const halo = galaxyGroup.userData.youHalo;
@@ -2520,6 +2522,11 @@ function animate() {
       const pulse = 1 + Math.sin(t) * 0.18;
       halo.scale.setScalar(80 * pulse);
       halo.material.opacity = 0.22 + (Math.sin(t) + 1) * 0.1;
+    }
+    if (!camTween.active) {
+      camera.position.copy(galaxyPos);
+      controls.target.copy(galaxyTarget);
+      camera.lookAt(galaxyTarget);
     }
   }
 
@@ -2583,7 +2590,7 @@ function animate() {
     controls.target.lerpVectors(camTween.fromTarget, camTween.toTarget, e);
     if (k >= 1) {
       camTween.active = false;
-      controls.enabled = true;
+      if (!galaxyGroup.visible) controls.enabled = true;
       // Begin following
       if (camTween.followObj) {
         followObj = camTween.followObj;
