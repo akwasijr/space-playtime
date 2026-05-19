@@ -3706,10 +3706,42 @@ function openQuiz(name) {
       why: q.why,
     };
   });
-  quizState = { name, questions, idx: 0, score: 0, answered: false };
+  quizState = { name, questions, idx: 0, score: 0, answered: false, started: false };
   quizTitle.textContent = `${name} quiz`;
   quizOverlay.hidden = false;
-  renderQuiz();
+  renderQuizSplash();
+}
+
+function renderQuizSplash() {
+  const s = quizState;
+  if (!s) return;
+  quizProgressFill.style.width = "0%";
+  const total = s.questions.length;
+  const letter = (s.name || "?").charAt(0).toUpperCase();
+  quizBody.innerHTML = `
+ <div class="quiz-splash">
+ <div class="quiz-splash-badge" aria-hidden="true">
+ <span class="quiz-splash-glyph">${letter}</span>
+ <span class="quiz-splash-orbit"></span>
+ <span class="quiz-splash-orbit quiz-splash-orbit-2"></span>
+ </div>
+ <h4 class="quiz-splash-title">${s.name} quiz</h4>
+ <p class="quiz-splash-sub">${total} question${total === 1 ? "" : "s"}, no time limit, just fun.</p>
+ <button type="button" class="quiz-btn quiz-start-btn" id="quiz-start">
+ Start
+ <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+ <path d="M3 8 L 13 8 M 9 4 L 13 8 L 9 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+ </svg>
+ </button>
+ </div>`;
+  const startBtn = document.getElementById("quiz-start");
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      s.started = true;
+      renderQuiz();
+    });
+    setTimeout(() => startBtn.focus(), 50);
+  }
 }
 
 function closeQuiz() {
@@ -3941,14 +3973,16 @@ function openInfo() {
       html += `</div>`;
     }
     html += `<div class="info-actions">`;
+    if (QUIZZES[name]) {
+      html += `<button type="button" class="quiz-launch" data-quiz="${name}">Take the ${name} quiz <span aria-hidden="true">→</span></button>`;
+    }
     html += `<button type="button" class="explore-btn" id="explore-cta">Explore ${name}</button>`;
-    html += `<div class="info-hint">Press the pills around ${name} to dig in.</div>`;
     html += `</div>`;
   } else {
     html = zoomedOn.userData.details || "";
-  }
-  if (QUIZZES[name]) {
-    html += `<button type="button" class="quiz-launch" data-quiz="${name}">Take the ${name} quiz <span aria-hidden="true">→</span></button>`;
+    if (QUIZZES[name]) {
+      html += `<button type="button" class="quiz-launch" data-quiz="${name}">Take the ${name} quiz <span aria-hidden="true">→</span></button>`;
+    }
   }
   infoBody.innerHTML = html;
   const quizBtn = infoBody.querySelector(".quiz-launch");
