@@ -3525,12 +3525,8 @@ function openInfo() {
       }
       html += `</div>`;
     }
-    html += `<button type="button" class="explore-btn" id="explore-cta">
-      <span class="explore-spark">✦</span>
-      <span>Explore ${name}!</span>
-      <span class="explore-spark">✦</span>
-    </button>`;
-    html += `<div class="info-hint">Press the colourful pills around ${name} to dig in.</div>`;
+    html += `<button type="button" class="explore-btn" id="explore-cta">Explore ${name}</button>`;
+    html += `<div class="info-hint">Press the pills around ${name} to dig in.</div>`;
   } else {
     html = zoomedOn.userData.details || "";
   }
@@ -3570,11 +3566,9 @@ var hotEls = hotspotsEl ? Array.from(hotspotsEl.querySelectorAll(".hot")) : [];
 
 // Hotspot screen-space anchors relative to body center (normalized to body radius)
 // [angle in degrees from top, outward distance multiplier of body radius]
-const HOTSPOT_OFFSETS = {
-  about: [-90, 1.6], // top
-  facts: [30, 1.6],  // upper right
-  stats: [150, 1.6], // lower right
-};
+// Hotspot positions are computed dynamically in updateHotspots based on
+// how many pills are currently visible. Kept as a constant for reference only.
+const HOTSPOT_DIST_MULT = 1.6;
 
 function bodyScreenInfo(obj) {
   // Compute screen-space center and approximate radius
@@ -3600,68 +3594,115 @@ function bodyScreenInfo(obj) {
   return { x: sx, y: sy, r: Math.max(36, screenR) };
 }
 
+// Even angle layouts for 1..4 visible pills (degrees, 0 = right, -90 = top)
+const PILL_LAYOUTS = {
+  1: [-90],
+  2: [-90, 90],
+  3: [-90, 30, 150],
+  4: [-90, 0, 90, 180],
+};
+
 function updateHotspots() {
   if (!hotspotsEl || hotspotsEl.hidden || !zoomedOn) return;
   const info = bodyScreenInfo(zoomedOn);
+  const visible = hotEls.filter((e) => !e.hidden);
   if (!info) {
-    for (const el of hotEls) el.style.opacity = "0";
+    for (const el of visible) el.style.opacity = "0";
     return;
   }
-  // Use a comfortable minimum offset so labels aren't on top of the body
   const baseR = Math.max(info.r, 80);
-  for (const el of hotEls) {
-    const section = el.dataset.section;
-    const off = HOTSPOT_OFFSETS[section];
-    if (!off) continue;
-    const angleRad = (off[0] * Math.PI) / 180;
-    const dist = baseR * off[1] + 30;
+  const dist = baseR * HOTSPOT_DIST_MULT + 30;
+  const angles = PILL_LAYOUTS[visible.length] || [-90, 0, 90, 180];
+  visible.forEach((el, idx) => {
+    const angleRad = (angles[idx] * Math.PI) / 180;
     const x = info.x + Math.cos(angleRad) * dist;
     const y = info.y + Math.sin(angleRad) * dist;
     el.style.left = x + "px";
     el.style.top = y + "px";
     el.style.opacity = "";
-  }
+  });
 }
 
-// Section visual config (icon SVG + header gradient + accent color)
+// Section visual config — one solid colour per section, simple icons
 const SECTION_META = {
-  about: {
-    label: "About",
-    accent: "#5b8cff",
-    grad: "linear-gradient(135deg, #5b8cff 0%, #7a5cff 100%)",
-    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 5 H 10.5 a2 2 0 0 1 1.5 1.5 V 20 a1.5 1.5 0 0 0-1.5-1.5 H 4 Z M 20 5 H 13.5 A 2 2 0 0 0 12 6.5 V 20 a 1.5 1.5 0 0 1 1.5-1.5 H 20 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
-  },
-  facts: {
-    label: "Wow facts",
-    accent: "#c870ff",
-    grad: "linear-gradient(135deg, #c870ff 0%, #ff5fa2 100%)",
-    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2.5 L14.4 8.6 L21 9.1 L16 13.2 L17.6 19.5 L12 16.2 L6.4 19.5 L8 13.2 L3 9.1 L9.6 8.6 Z" fill="currentColor"/></svg>',
-  },
-  stats: {
-    label: "By the numbers",
-    accent: "#27d4b6",
-    grad: "linear-gradient(135deg, #27d4b6 0%, #2bb7ff 100%)",
-    icon: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="13" width="4" height="8" rx="1" fill="currentColor"/><rect x="10" y="8" width="4" height="13" rx="1" fill="currentColor"/><rect x="17" y="4" width="4" height="17" rx="1" fill="currentColor"/></svg>',
-  },
+  about:  { label: "About",          color: "#ffd166", icon: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5 H 10.5 a2 2 0 0 1 1.5 1.5 V 20 a1.5 1.5 0 0 0-1.5-1.5 H 4 Z M 20 5 H 13.5 A 2 2 0 0 0 12 6.5 V 20 a 1.5 1.5 0 0 1 1.5-1.5 H 20 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>' },
+  facts:  { label: "Wow facts",      color: "#ff8c69", icon: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2.5 L14.4 8.6 L21 9.1 L16 13.2 L17.6 19.5 L12 16.2 L6.4 19.5 L8 13.2 L3 9.1 L9.6 8.6 Z" fill="currentColor"/></svg>' },
+  stats:  { label: "By the numbers", color: "#7adfb9", icon: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="13" width="4" height="8" rx="1" fill="currentColor"/><rect x="10" y="8" width="4" height="13" rx="1" fill="currentColor"/><rect x="17" y="4" width="4" height="17" rx="1" fill="currentColor"/></svg>' },
+  inside: { label: "Inside",         color: "#b8a6e8", icon: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>' },
 };
 
-// Palette for fact cards (cycled)
-const FACT_PALETTE = [
-  ["#ff7ab6", "#ff4b88"],
-  ["#7ab6ff", "#4b6dff"],
-  ["#ffd166", "#ff9a3c"],
-  ["#5bd4ff", "#27a1ff"],
-  ["#a78bfa", "#7c4dff"],
-  ["#5be4a2", "#27c878"],
-  ["#ff8a73", "#ff5a3c"],
-  ["#67e8f9", "#0ea5e9"],
-];
+// Internal cross-sections. outerFrac is each layer's outer boundary as a
+// fraction of body radius. Inner boundary = previous layer's outerFrac (or 0).
+const LAYERS = {
+  Sun: [
+    { name: "Core",            outerFrac: 0.25,  color: "#fff4c2", desc: "Hydrogen squeezes into helium at 15 million °C. All the Sun's energy is born here." },
+    { name: "Radiative zone",  outerFrac: 0.70,  color: "#ffd76b", desc: "Light made in the core bounces around for thousands of years trying to escape this dense layer." },
+    { name: "Convective zone", outerFrac: 0.93,  color: "#ff9a3c", desc: "Giant bubbles of hot gas carry heat up to the surface, like a vast boiling soup." },
+    { name: "Photosphere",     outerFrac: 0.96,  color: "#ffb84d", desc: "The glowing 'surface' we see, around 5,500 °C. Sunspots live in this layer." },
+    { name: "Chromosphere",    outerFrac: 0.985, color: "#ff7a6b", desc: "A reddish layer of cooler gas. Usually only visible during a total solar eclipse." },
+    { name: "Corona",          outerFrac: 1.0,   color: "#d6dcff", desc: "The wispy outer atmosphere. Strangely, it's millions of degrees hotter than the surface below." },
+  ],
+  Mercury: [
+    { name: "Inner core",      outerFrac: 0.30,  color: "#c8ad8c", desc: "Solid iron at the very centre, about the size of our Moon." },
+    { name: "Outer core",      outerFrac: 0.85,  color: "#d4af7a", desc: "Molten iron. Mercury's metal heart is huge — it takes up about 80% of the planet." },
+    { name: "Mantle",          outerFrac: 0.97,  color: "#9b8466", desc: "A thin shell of rock wrapped around the giant core." },
+    { name: "Crust",           outerFrac: 1.0,   color: "#7d6b54", desc: "Cratered grey surface with tall cliffs from when the planet shrank as it cooled." },
+  ],
+  Venus: [
+    { name: "Core",            outerFrac: 0.51,  color: "#ffcf6b", desc: "Iron-nickel heart. We think most of it is still molten." },
+    { name: "Mantle",          outerFrac: 0.99,  color: "#d49a4a", desc: "Hot rock that feeds Venus's many thousands of volcanoes." },
+    { name: "Crust",           outerFrac: 1.0,   color: "#a87a3a", desc: "Thin volcanic crust hiding under a crushing toxic atmosphere." },
+  ],
+  Earth: [
+    { name: "Inner core",      outerFrac: 0.19,  color: "#fff0c2", desc: "Solid iron-nickel ball, as hot as the Sun's surface — about 5,400 °C." },
+    { name: "Outer core",      outerFrac: 0.55,  color: "#ff9a3c", desc: "Swirling liquid iron. Its motion creates Earth's magnetic field, the thing that makes compasses work." },
+    { name: "Mantle",          outerFrac: 0.996, color: "#c54a2c", desc: "Hot, slow-flowing rock. It moves the continents over millions of years." },
+    { name: "Crust",           outerFrac: 1.0,   color: "#6f8e4e", desc: "The thin rocky shell we live on. Compared to the whole planet it's thinner than an apple peel." },
+  ],
+  Moon: [
+    { name: "Inner core",      outerFrac: 0.13,  color: "#ffb84d", desc: "A tiny solid iron centre, about 240 km across." },
+    { name: "Outer core",      outerFrac: 0.21,  color: "#ffd166", desc: "A thin shell of melted iron around the inner core." },
+    { name: "Mantle",          outerFrac: 0.99,  color: "#9d8b78", desc: "Solid rock that had volcanoes long, long ago." },
+    { name: "Crust",           outerFrac: 1.0,   color: "#cfc5b6", desc: "Grey rock covered in fine dust from billions of years of meteor strikes." },
+  ],
+  Mars: [
+    { name: "Core",            outerFrac: 0.50,  color: "#ffb07a", desc: "Mostly molten iron and sulphur. Bigger than scientists used to think." },
+    { name: "Mantle",          outerFrac: 0.98,  color: "#c75a3a", desc: "Rocky layer that once powered Olympus Mons, the biggest volcano in the solar system." },
+    { name: "Crust",           outerFrac: 1.0,   color: "#8a3a1f", desc: "Rusty red surface. The iron in the rocks has actually rusted." },
+  ],
+  Jupiter: [
+    { name: "Core region",       outerFrac: 0.18, color: "#5b4a3a", desc: "A fuzzy mix of rock, metal and gas. About 10 Earths' worth of stuff." },
+    { name: "Metallic hydrogen", outerFrac: 0.78, color: "#7d6a55", desc: "Hydrogen squeezed so hard it behaves like liquid metal. Powers Jupiter's huge magnetic field." },
+    { name: "Liquid hydrogen",   outerFrac: 0.96, color: "#caa97e", desc: "A deep ocean of liquid hydrogen and helium with no real surface." },
+    { name: "Cloud tops",        outerFrac: 1.0,  color: "#e8d3a8", desc: "The famous coloured bands and the Great Red Spot live here." },
+  ],
+  Saturn: [
+    { name: "Core region",       outerFrac: 0.20, color: "#5b4f3a", desc: "Small dense centre of rock and ice." },
+    { name: "Metallic hydrogen", outerFrac: 0.50, color: "#8a7a5a", desc: "Same exotic liquid-metal hydrogen as Jupiter has." },
+    { name: "Liquid hydrogen",   outerFrac: 0.95, color: "#d4be8a", desc: "Deep liquid hydrogen and helium ocean." },
+    { name: "Cloud tops",        outerFrac: 1.0,  color: "#f0d9a0", desc: "Soft pastel bands of cream and gold with super-fast winds." },
+  ],
+  Uranus: [
+    { name: "Core region", outerFrac: 0.20, color: "#3a4a5b", desc: "Small core of rock and ice." },
+    { name: "Icy mantle",  outerFrac: 0.85, color: "#7ec6c8", desc: "A hot dense slush of water, methane and ammonia ices. That's why Uranus is called an 'ice giant'." },
+    { name: "Atmosphere",  outerFrac: 1.0,  color: "#bce6e8", desc: "Hydrogen, helium and methane. Methane is what makes Uranus look turquoise." },
+  ],
+  Neptune: [
+    { name: "Core region", outerFrac: 0.20, color: "#2a3b5b", desc: "Earth-sized core of rock and ice." },
+    { name: "Icy mantle",  outerFrac: 0.85, color: "#4a7ac8", desc: "Super-hot dense ice soup. Some scientists think it might actually rain diamonds inside." },
+    { name: "Atmosphere",  outerFrac: 1.0,  color: "#5b8de8", desc: "Methane gives Neptune its deep blue, and the fastest winds in the solar system — over 2,000 km/h." },
+  ],
+  Pluto: [
+    { name: "Rocky core",          outerFrac: 0.70, color: "#6e5340", desc: "A big rocky heart — about 70% of Pluto's size." },
+    { name: "Water-ice mantle",    outerFrac: 0.96, color: "#a8c0d8", desc: "There might even be a hidden liquid water ocean hiding under the ice." },
+    { name: "Nitrogen ice crust",  outerFrac: 1.0,  color: "#e4d6c4", desc: "Frozen nitrogen and methane. The famous heart-shaped Tombaugh Regio lives here." },
+  ],
+};
 
-// Emoji-free section heading helper
 function sectionHeaderHTML(section, subtitle) {
   const meta = SECTION_META[section];
-  return `<div class="sp-header" style="background:${meta.grad};">
-    <span class="sp-header-icon">${meta.icon}</span>
+  return `<div class="sp-header" style="--accent:${meta.color};">
+    <span class="sp-header-icon" style="color:${meta.color};">${meta.icon}</span>
     <div class="sp-header-titles">
       <div class="sp-header-title">${meta.label}</div>
       <div class="sp-header-sub">${subtitle}</div>
@@ -3669,11 +3710,56 @@ function sectionHeaderHTML(section, subtitle) {
   </div>`;
 }
 
+// Build the SVG cross-section + tappable layer list for the Inside section.
+// Uses min-width normalization so thin layers stay visible without overflowing
+// the body's radius.
+function buildLayersHTML(layers, accent) {
+  const R = 100; // SVG radius units
+  const N = layers.length;
+  const minBand = 9;
+  // True band widths (outerFrac - innerFrac), with inner = prev.outerFrac
+  const trueWidths = layers.map((l, i) => {
+    const inner = i === 0 ? 0 : layers[i - 1].outerFrac;
+    return Math.max(0.0001, l.outerFrac - inner);
+  });
+  const totalTrue = trueWidths.reduce((a, b) => a + b, 0);
+  const available = Math.max(0, R - N * minBand);
+  const visWidths = trueWidths.map((w) => minBand + available * (w / totalTrue));
+  // Accumulate outer radii so each circle is drawn from origin
+  const outerRs = [];
+  let acc = 0;
+  for (let i = 0; i < N; i++) {
+    acc += visWidths[i];
+    outerRs.push(acc);
+  }
+  let svg = `<svg class="layers-svg" viewBox="-110 -110 220 220" role="img" aria-label="Cross-section">`;
+  // Draw outermost first so inner circles cover the centre — natural rings
+  for (let i = N - 1; i >= 0; i--) {
+    svg += `<circle class="layer-ring" data-layer="${i}" data-r="${outerRs[i].toFixed(2)}" cx="0" cy="0" r="${outerRs[i].toFixed(2)}" fill="${layers[i].color}"/>`;
+  }
+  // Selected outline overlay (drawn last so it's on top)
+  svg += `<circle id="layer-highlight" cx="0" cy="0" r="0" fill="none" stroke="${accent}" stroke-width="2.4" style="pointer-events:none;opacity:0;"/>`;
+  svg += `</svg>`;
+  let list = `<div class="layer-list" role="list">`;
+  layers.forEach((l, i) => {
+    list += `<button class="layer-item" type="button" role="listitem" data-layer="${i}" data-r="${outerRs[i].toFixed(2)}" aria-pressed="false">
+      <span class="layer-swatch" style="background:${l.color};"></span>
+      <span class="layer-info">
+        <span class="layer-name">${l.name}</span>
+        <span class="layer-desc">${l.desc}</span>
+      </span>
+    </button>`;
+  });
+  list += `</div>`;
+  return `<div class="layers-wrap">${svg}${list}</div>`;
+}
+
 function openSection(section) {
   if (!zoomedOn) return;
   const data = zoomedOn.userData.detailsData;
   if (!data) return;
   const name = zoomedOn.userData.name || "";
+  const meta = SECTION_META[section];
   sectionPop.dataset.section = section;
   let html = sectionHeaderHTML(section, name);
   html += `<div class="sp-content">`;
@@ -3686,39 +3772,72 @@ function openSection(section) {
     if (!(data.intro && data.intro.length)) html += `<p class="sp-p">No description yet.</p>`;
   } else if (section === "facts") {
     if (data.facts && data.facts.length) {
-      html += `<div class="facts-grid">`;
+      html += `<ul class="facts-list">`;
       data.facts.forEach((f, i) => {
-        const [c1, c2] = FACT_PALETTE[i % FACT_PALETTE.length];
-        const rot = ((i % 2) ? 1 : -1) * (0.6 + (i % 3) * 0.3);
-        html += `<div class="fact-card" style="--c1:${c1};--c2:${c2};--rot:${rot}deg;--d:${i * 70}ms;">
-          <div class="fact-num">${i + 1}</div>
-          <div class="fact-text">${f}</div>
-        </div>`;
+        html += `<li class="fact-item" style="--d:${i * 50}ms;">
+          <span class="fact-num" style="color:${meta.color};">${i + 1}</span>
+          <span class="fact-text">${f}</span>
+        </li>`;
       });
-      html += `</div>`;
+      html += `</ul>`;
     } else {
-      html += `<p class="sp-p">No fun facts yet — check back soon!</p>`;
+      html += `<p class="sp-p">No fun facts yet — check back soon.</p>`;
     }
   } else if (section === "stats") {
     if (data.stats && Object.keys(data.stats).length) {
-      html += `<div class="stats-grid">`;
+      html += `<dl class="stats-list">`;
       Object.entries(data.stats).forEach(([k, v], i) => {
-        const [c1, c2] = FACT_PALETTE[(i + 3) % FACT_PALETTE.length];
-        html += `<div class="stat-tile" style="--c1:${c1};--c2:${c2};--d:${i * 60}ms;">
-          <div class="stat-v">${v}</div>
-          <div class="stat-k">${k}</div>
+        html += `<div class="stat-row" style="--d:${i * 40}ms;">
+          <dt class="stat-k">${k}</dt>
+          <dd class="stat-v">${v}</dd>
         </div>`;
       });
-      html += `</div>`;
+      html += `</dl>`;
     } else {
       html += `<p class="sp-p">No numbers to show.</p>`;
+    }
+  } else if (section === "inside") {
+    const layers = LAYERS[name];
+    if (layers && layers.length) {
+      html += `<p class="sp-tagline">Tap a layer to learn more.</p>`;
+      html += buildLayersHTML(layers, meta.color);
+    } else {
+      html += `<p class="sp-p">No inside view available for ${name}.</p>`;
     }
   }
   html += `</div>`;
   sectionPop.innerHTML = `<button id="section-pop-close" class="section-pop-close" type="button" aria-label="Close">×</button>${html}`;
-  // Re-bind close button (it was overwritten by innerHTML)
+  // Re-bind close button
   const closeBtn = sectionPop.querySelector("#section-pop-close");
   if (closeBtn) closeBtn.addEventListener("click", closeSectionPop);
+  // Wire up layer interactivity if present
+  if (section === "inside") {
+    const layerBtns = Array.from(sectionPop.querySelectorAll(".layer-item"));
+    const layerRings = Array.from(sectionPop.querySelectorAll(".layer-ring"));
+    const highlight = sectionPop.querySelector("#layer-highlight");
+    const selectLayer = (i) => {
+      layerBtns.forEach((b, idx) => {
+        const sel = idx === i;
+        b.setAttribute("aria-pressed", sel ? "true" : "false");
+        b.classList.toggle("is-selected", sel);
+      });
+      if (highlight) {
+        const r = layerBtns[i] ? layerBtns[i].dataset.r : 0;
+        highlight.setAttribute("r", r);
+        highlight.style.opacity = "1";
+      }
+    };
+    layerBtns.forEach((btn) =>
+      btn.addEventListener("click", () => selectLayer(parseInt(btn.dataset.layer, 10))),
+    );
+    layerRings.forEach((r) =>
+      r.addEventListener("click", () => selectLayer(parseInt(r.dataset.layer, 10))),
+    );
+    // Auto-select outermost layer as default
+    if (layerBtns.length) selectLayer(layerBtns.length - 1);
+  }
+  // Hide hotspots while popup is open so nothing overlaps
+  hotspotsEl.hidden = true;
   sectionPop.hidden = false;
   // Position the popup: prefer left of the body, else right, else center
   const info = bodyScreenInfo(zoomedOn);
@@ -3742,6 +3861,10 @@ function openSection(section) {
 
 function closeSectionPop() {
   sectionPop.hidden = true;
+  // Restore hotspots if we still have a zoomed body with details
+  if (zoomedOn && zoomedOn.userData.detailsData) {
+    hotspotsEl.hidden = false;
+  }
 }
 
 for (const el of hotEls) {
@@ -3760,9 +3883,19 @@ function showHotspotsForCurrent() {
     hotspotsEl.hidden = true;
     return;
   }
-  hotspotsEl.hidden = false;
-  // Reset animation by re-toggling the class
+  const name = zoomedOn.userData.name;
+  // Hide Inside pill if no layer data for this body
   for (const el of hotEls) {
+    if (el.dataset.section === "inside") {
+      el.hidden = !(LAYERS[name] && LAYERS[name].length);
+    } else {
+      el.hidden = false;
+    }
+  }
+  hotspotsEl.hidden = false;
+  // Reset entry animation
+  for (const el of hotEls) {
+    if (el.hidden) continue;
     el.style.animation = "none";
     void el.offsetWidth;
     el.style.animation = "";
