@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Space</title>
-<link rel="stylesheet" href="styles.css?v=40" />
+<link rel="stylesheet" href="styles.css?v=41" />
 <script type="importmap">
 {
   "imports": {
@@ -189,27 +189,67 @@
 
   <aside id="iss-panel" class="iss-panel" hidden aria-labelledby="iss-panel-title">
     <div class="iss-panel-head">
-      <div>
-        <div class="iss-panel-eyebrow">Astronaut view</div>
-        <h2 id="iss-panel-title">Aboard the ISS</h2>
-      </div>
+      <div class="iss-panel-eyebrow">Astronaut view</div>
+      <h2 id="iss-panel-title">Aboard the ISS</h2>
+      <p class="iss-panel-intro">You're looking down from the cupola of the International Space Station, our home in low Earth orbit. Seven astronauts live and work up here right now.</p>
     </div>
 
     <div class="iss-panel-body">
-      <div class="iss-stats">
-        <div class="iss-stat">
-          <div class="iss-stat-label">Speed</div>
-          <div class="iss-stat-row"><span class="iss-stat-val" id="iss-speed">27,600</span><span class="iss-stat-unit">km/h</span></div>
+      <section class="iss-section">
+        <h3 class="iss-section-title">Right now</h3>
+        <div class="iss-stats">
+          <div class="iss-stat">
+            <div class="iss-stat-label">Speed</div>
+            <div class="iss-stat-row"><span class="iss-stat-val" id="iss-speed">27,600</span><span class="iss-stat-unit">km/h</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Altitude</div>
+            <div class="iss-stat-row"><span class="iss-stat-val" id="iss-alt">408</span><span class="iss-stat-unit">km</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Currently above</div>
+            <div class="iss-stat-row"><span class="iss-stat-val iss-stat-val-text" id="iss-over">Pacific Ocean</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Next sunrise in</div>
+            <div class="iss-stat-row"><span class="iss-stat-val" id="iss-sunrise-next">45</span><span class="iss-stat-unit">min</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Sunrises today</div>
+            <div class="iss-stat-row"><span class="iss-stat-val" id="iss-sunrises">0</span><span class="iss-stat-unit">of 16</span></div>
+          </div>
         </div>
-        <div class="iss-stat">
-          <div class="iss-stat-label">Altitude</div>
-          <div class="iss-stat-row"><span class="iss-stat-val" id="iss-alt">408</span><span class="iss-stat-unit">km</span></div>
+      </section>
+
+      <section class="iss-section">
+        <h3 class="iss-section-title">About the station</h3>
+        <div class="iss-stats">
+          <div class="iss-stat">
+            <div class="iss-stat-label">Crew aboard</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">7</span><span class="iss-stat-unit">people</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">In orbit since</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">1998</span><span class="iss-stat-unit">26+ years</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Mass</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">420</span><span class="iss-stat-unit">tonnes</span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Pressurised modules</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">16</span><span class="iss-stat-unit"></span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Solar panel wings</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">8</span><span class="iss-stat-unit"></span></div>
+          </div>
+          <div class="iss-stat">
+            <div class="iss-stat-label">Length end to end</div>
+            <div class="iss-stat-row"><span class="iss-stat-val">109</span><span class="iss-stat-unit">m</span></div>
+          </div>
         </div>
-        <div class="iss-stat">
-          <div class="iss-stat-label">Sunrises today</div>
-          <div class="iss-stat-row"><span class="iss-stat-val" id="iss-sunrises">0</span><span class="iss-stat-unit">of 16</span></div>
-        </div>
-      </div>
+      </section>
 
       <div id="iss-fact" class="iss-fact-card">
         <div class="iss-fact-tag">Did you know?</div>
@@ -304,6 +344,6 @@
     </svg>
   </div>
 
-  <script type="module" src="app.js?v=40"></script>
+  <script type="module" src="app.js?v=41"></script>
 </body>
 </html>

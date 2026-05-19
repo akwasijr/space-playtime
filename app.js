@@ -2395,12 +2395,32 @@ const ISS_FACTS = [
 
 let issIntervals = [];
 let issFactIdx = 0;
+let issOverIdx = 0;
+
+const ISS_OVER_LOCATIONS = [
+  "Pacific Ocean",
+  "North Atlantic",
+  "Indian Ocean",
+  "Sahara Desert",
+  "Amazon rainforest",
+  "Himalayas",
+  "Australia",
+  "Antarctica",
+  "Greenland",
+  "South China Sea",
+  "Andes mountains",
+  "Mediterranean Sea",
+  "Caribbean",
+  "Siberia",
+];
 
 function startIssAnimations() {
   stopIssAnimations();
   const speedEl = document.getElementById("iss-speed");
   const altEl = document.getElementById("iss-alt");
   const sunEl = document.getElementById("iss-sunrises");
+  const overEl = document.getElementById("iss-over");
+  const nextEl = document.getElementById("iss-sunrise-next");
   const factEl = document.getElementById("iss-fact-text");
   const factWrap = document.getElementById("iss-fact");
   // Speed flicker around real ISS speed
@@ -2416,13 +2436,33 @@ function startIssAnimations() {
       altEl.textContent = String(406 + Math.round(Math.random() * 5));
     }, 2200));
   }
-  // Sunrises counter, increment one every 7s, cycle back to 0 after 16
+  // Sunrises counter, increment one every 6s, cycle back to 0 after 16
   let sunrises = 0;
   if (sunEl) sunEl.textContent = "0";
   issIntervals.push(setInterval(() => {
     sunrises = sunrises >= 16 ? 0 : sunrises + 1;
     if (sunEl) sunEl.textContent = String(sunrises);
-  }, 7000));
+  }, 6000));
+  // Currently above: cycle every 5.5s
+  issOverIdx = Math.floor(Math.random() * ISS_OVER_LOCATIONS.length);
+  if (overEl) overEl.textContent = ISS_OVER_LOCATIONS[issOverIdx];
+  issIntervals.push(setInterval(() => {
+    issOverIdx = (issOverIdx + 1) % ISS_OVER_LOCATIONS.length;
+    if (overEl) {
+      overEl.style.opacity = "0";
+      setTimeout(() => {
+        overEl.textContent = ISS_OVER_LOCATIONS[issOverIdx];
+        overEl.style.opacity = "1";
+      }, 200);
+    }
+  }, 5500));
+  // Next sunrise countdown: 45 -> 0 -> 45, tick every 1.5s (compressed)
+  let nextMin = 45;
+  if (nextEl) nextEl.textContent = "45";
+  issIntervals.push(setInterval(() => {
+    nextMin = nextMin <= 1 ? 45 : nextMin - 1;
+    if (nextEl) nextEl.textContent = String(nextMin);
+  }, 1500));
   // Fact cycler with fade
   issFactIdx = Math.floor(Math.random() * ISS_FACTS.length);
   if (factEl) factEl.textContent = ISS_FACTS[issFactIdx];

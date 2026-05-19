@@ -448,14 +448,14 @@ body.pointing { cursor: pointer; }
 }
 
 .iss-panel-head {
-  padding: 20px 22px 16px;
+  padding: 20px 22px 14px;
 }
 .iss-panel-eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #7adfff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(122, 223, 255, 0.85);
   margin-bottom: 4px;
 }
 .iss-panel-head h2 {
@@ -464,6 +464,12 @@ body.pointing { cursor: pointer; }
   font-weight: 700;
   letter-spacing: -0.01em;
 }
+.iss-panel-intro {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(243, 246, 255, 0.7);
+}
 
 .iss-panel-body {
   flex: 1;
@@ -471,22 +477,33 @@ body.pointing { cursor: pointer; }
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+}
+
+/* Section heading inside the panel */
+.iss-section { display: flex; flex-direction: column; }
+.iss-section-title {
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(243, 246, 255, 0.65);
 }
 
 /* Live readouts list */
 .iss-stats {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 .iss-stat {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 10px 0;
+  padding: 9px 0;
 }
-.iss-stat + .iss-stat { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.iss-stat + .iss-stat { border-top: 1px solid rgba(255, 255, 255, 0.05); }
 .iss-stat-label {
   font-size: 13px;
   font-weight: 500;
@@ -498,10 +515,15 @@ body.pointing { cursor: pointer; }
   gap: 5px;
 }
 .iss-stat-val {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  transition: color 220ms ease;
+  transition: color 220ms ease, opacity 220ms ease;
+}
+.iss-stat-val-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f6ff;
 }
 .iss-stat-unit {
   font-size: 12px;
@@ -511,6 +533,7 @@ body.pointing { cursor: pointer; }
 #iss-speed { color: #7adfff; }
 #iss-alt   { color: #ffd97a; }
 #iss-sunrises { color: #ffb068; }
+#iss-sunrise-next { color: #ffd97a; }
 
 /* Fact card */
 .iss-fact-card {
@@ -522,10 +545,10 @@ body.pointing { cursor: pointer; }
 }
 .iss-fact-card.is-fading { opacity: 0; transform: translateY(4px); }
 .iss-fact-tag {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: #ffd97a;
   margin-bottom: 6px;
 }
