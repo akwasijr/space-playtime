@@ -2112,6 +2112,7 @@ const homeTarget = new THREE.Vector3(0, 0, 0);
 
 function flyHome() {
   if (typeof tour !== "undefined" && tour && tour.active) tour.exit();
+  if (typeof exitGalaxyMode === "function") exitGalaxyMode();
   camTween.fromPos.copy(camera.position);
   camTween.toPos.copy(homePos);
   camTween.fromTarget.copy(controls.target);
@@ -2126,29 +2127,203 @@ function flyHome() {
   backBtn.hidden = true;
 }
 
-// ---- Galaxy view: pull the camera way out so the solar system sits inside the Milky Way ----
-const galaxyPos = new THREE.Vector3(280, 620, 1180);
+// ---- Galaxy view: a proper top-down Milky Way ----
+const galaxyGroup = new THREE.Group();
+galaxyGroup.visible = false;
+scene.add(galaxyGroup);
+let galaxyHiddenSnapshot = null;
+
+(function buildMilkyWay() {
+  const GAL_R = 600;       // outer galaxy radius
+  const BULGE_R = 110;     // central bulge radius
+  const ARMS = 4;
+  const TWIST = 4.6;       // how many full turns from centre to edge
+
+  // ----- Central bulge (warm yellow/orange, dense) -----
+  const bulgeCount = 5000;
+  const bp = new Float32Array(bulgeCount * 3);
+  const bc = new Float32Array(bulgeCount * 3);
+  for (let i = 0; i < bulgeCount; i++) {
+    const r = Math.pow(Math.random(), 2.2) * BULGE_R;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const flatten = 0.45;
+    bp[i*3]     = r * Math.sin(phi) * Math.cos(theta);
+    bp[i*3 + 1] = r * Math.cos(phi) * flatten;
+    bp[i*3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    const t = 1 - r / BULGE_R;
+    bc[i*3]     = 1.0;
+    bc[i*3 + 1] = 0.82 + t * 0.12;
+    bc[i*3 + 2] = 0.55 + t * 0.25;
+  }
+  const bg = new THREE.BufferGeometry();
+  bg.setAttribute("position", new THREE.BufferAttribute(bp, 3));
+  bg.setAttribute("color", new THREE.BufferAttribute(bc, 3));
+  galaxyGroup.add(new THREE.Points(bg, new THREE.PointsMaterial({
+    size: 2.6, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0.95, map: roundPointTex,
+    alphaTest: 0.05, depthWrite: false, blending: THREE.AdditiveBlending,
+  })));
+
+  // ----- Spiral arms (blue/white hot stars) -----
+  const armCount = 30000;
+  const ap = new Float32Array(armCount * 3);
+  const ac = new Float32Array(armCount * 3);
+  for (let i = 0; i < armCount; i++) {
+    const arm = i % ARMS;
+    // Push more stars toward the outer disc, but keep some near the bulge
+    const rFrac = Math.pow(Math.random(), 0.85);
+    const r = BULGE_R * 0.7 + rFrac * (GAL_R - BULGE_R * 0.7);
+    // Spiral angle: each arm offset by 2π/ARMS, plus twist proportional to radius
+    const armAngle = (arm / ARMS) * Math.PI * 2;
+    const twistAngle = (r / GAL_R) * TWIST * Math.PI * 2;
+    // Spread perpendicular to the arm centreline (thicker near centre)
+    const spread = (1 - rFrac * 0.6) * 0.42;
+    const wobble = (Math.random() - 0.5) * spread;
+    const theta = armAngle + twistAngle + wobble;
+    // Thin disc + slight thickness, thinner at the rim
+    const thickness = 18 * (1 - rFrac * 0.7);
+    const y = (Math.random() - 0.5) * thickness * 2 * (Math.random() ** 1.5);
+    ap[i*3]     = r * Math.cos(theta);
+    ap[i*3 + 1] = y;
+    ap[i*3 + 2] = r * Math.sin(theta);
+    // Colour: bluer in arms, slightly warmer mixed in
+    const blueish = Math.random() < 0.7;
+    const b = 0.55 + Math.random() * 0.4;
+    if (blueish) {
+      ac[i*3]     = b * 0.75;
+      ac[i*3 + 1] = b * 0.88;
+      ac[i*3 + 2] = Math.min(1, b + 0.18);
+    } else {
+      ac[i*3]     = Math.min(1, b + 0.15);
+      ac[i*3 + 1] = b * 0.92;
+      ac[i*3 + 2] = b * 0.78;
+    }
+  }
+  const ag = new THREE.BufferGeometry();
+  ag.setAttribute("position", new THREE.BufferAttribute(ap, 3));
+  ag.setAttribute("color", new THREE.BufferAttribute(ac, 3));
+  galaxyGroup.add(new THREE.Points(ag, new THREE.PointsMaterial({
+    size: 1.8, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0.9, map: roundPointTex,
+    alphaTest: 0.05, depthWrite: false, blending: THREE.AdditiveBlending,
+  })));
+
+  // ----- Dust haze on the disc (soft glow) -----
+  const hazeCount = 8000;
+  const hp = new Float32Array(hazeCount * 3);
+  const hc = new Float32Array(hazeCount * 3);
+  for (let i = 0; i < hazeCount; i++) {
+    const arm = i % ARMS;
+    const rFrac = Math.pow(Math.random(), 0.8);
+    const r = BULGE_R * 0.6 + rFrac * (GAL_R - BULGE_R * 0.6);
+    const armAngle = (arm / ARMS) * Math.PI * 2;
+    const twistAngle = (r / GAL_R) * TWIST * Math.PI * 2;
+    const wobble = (Math.random() - 0.5) * 0.7;
+    const theta = armAngle + twistAngle + wobble;
+    hp[i*3]     = r * Math.cos(theta);
+    hp[i*3 + 1] = (Math.random() - 0.5) * 18;
+    hp[i*3 + 2] = r * Math.sin(theta);
+    const t = 0.15 + Math.random() * 0.18;
+    hc[i*3]     = t * 1.0;
+    hc[i*3 + 1] = t * 0.85;
+    hc[i*3 + 2] = t * 0.7;
+  }
+  const hg = new THREE.BufferGeometry();
+  hg.setAttribute("position", new THREE.BufferAttribute(hp, 3));
+  hg.setAttribute("color", new THREE.BufferAttribute(hc, 3));
+  galaxyGroup.add(new THREE.Points(hg, new THREE.PointsMaterial({
+    size: 9, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0.55, map: roundPointTex,
+    alphaTest: 0.02, depthWrite: false, blending: THREE.AdditiveBlending,
+  })));
+
+  // ----- "You are here" marker at the Sun's position in the galaxy -----
+  // Sun sits ~26,000 ly from the centre; galaxy ~50,000 ly across.
+  const sunR = GAL_R * 0.52;
+  const sunArm = 0; // place on the first arm so it lands on a visible arm
+  const sunAngle = (sunArm / ARMS) * Math.PI * 2 + (sunR / GAL_R) * TWIST * Math.PI * 2;
+  const sunPos = new THREE.Vector3(
+    sunR * Math.cos(sunAngle),
+    2,
+    sunR * Math.sin(sunAngle),
+  );
+  const youDot = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: roundPointTex,
+    color: 0xffd166,
+    transparent: true,
+    opacity: 1,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  }));
+  youDot.position.copy(sunPos);
+  youDot.scale.setScalar(28);
+  galaxyGroup.add(youDot);
+
+  const youHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: roundPointTex,
+    color: 0xffd166,
+    transparent: true,
+    opacity: 0.32,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  }));
+  youHalo.position.copy(sunPos).y += 0.5;
+  youHalo.scale.setScalar(80);
+  galaxyGroup.add(youHalo);
+
+  // Pulse the halo
+  galaxyGroup.userData.youHalo = youHalo;
+  galaxyGroup.userData.sunPos = sunPos.clone();
+})();
+
+const galaxyPos = new THREE.Vector3(0, 720, 880);
 const galaxyTarget = new THREE.Vector3(0, 0, 0);
+
+function enterGalaxyMode() {
+  if (galaxyHiddenSnapshot) return;
+  galaxyHiddenSnapshot = [];
+  for (const child of scene.children) {
+    if (child === galaxyGroup) continue;
+    galaxyHiddenSnapshot.push([child, child.visible]);
+    child.visible = false;
+  }
+  galaxyGroup.visible = true;
+  // Hide UI bits that don't make sense in this view
+  if (typeof hotspotsEl !== "undefined" && hotspotsEl) hotspotsEl.hidden = true;
+  if (typeof sectionPop !== "undefined" && sectionPop) sectionPop.hidden = true;
+  if (typeof infoToggle !== "undefined" && infoToggle) infoToggle.hidden = true;
+  if (typeof infoPanel !== "undefined" && infoPanel) infoPanel.hidden = true;
+}
+
+function exitGalaxyMode() {
+  if (!galaxyHiddenSnapshot) return;
+  for (const [child, vis] of galaxyHiddenSnapshot) child.visible = vis;
+  galaxyGroup.visible = false;
+  galaxyHiddenSnapshot = null;
+}
+
 function flyToGalaxyView() {
   if (typeof tour !== "undefined" && tour && tour.active) tour.exit();
   zoomedOn = null;
   if (typeof infoToggle !== "undefined") infoToggle.hidden = true;
   if (typeof infoPanel !== "undefined") infoPanel.hidden = true;
   if (typeof hideHotspots === "function") hideHotspots();
+  enterGalaxyMode();
   camTween.fromPos.copy(camera.position);
   camTween.toPos.copy(galaxyPos);
   camTween.fromTarget.copy(controls.target);
   camTween.toTarget.copy(galaxyTarget);
   camTween.t = 0;
-  camTween.dur = 1.8;
+  camTween.dur = 1.6;
   camTween.active = true;
   camTween.followObj = null;
   followObj = null;
   controls.enabled = false;
   exitFeedMode();
-  showCaption("Galaxy view — the solar system inside the Milky Way");
+  showCaption("The Milky Way — our galaxy. The yellow dot is us.");
   backBtn.hidden = false;
-  setTimeout(() => { camTween.dur = 1.2; }, 1900);
+  setTimeout(() => { camTween.dur = 1.2; }, 1700);
 }
 
 // --- caption + state ---
@@ -2183,6 +2358,12 @@ canvas.addEventListener("pointerup", (e) => {
   const wasDrag = dx * dx + dy * dy > 25;
   downPos = null;
   if (wasDrag) return;
+
+  // In galaxy view a tap on empty space returns home
+  if (galaxyGroup.visible) {
+    flyHome();
+    return;
+  }
 
   pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -2287,6 +2468,18 @@ const clock = new THREE.Clock();
 
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
+
+  // Galaxy view: slow rotate + pulse "you are here" halo
+  if (galaxyGroup.visible) {
+    galaxyGroup.rotation.y += dt * 0.04;
+    const halo = galaxyGroup.userData.youHalo;
+    if (halo) {
+      const t = performance.now() * 0.002;
+      const pulse = 1 + Math.sin(t) * 0.18;
+      halo.scale.setScalar(80 * pulse);
+      halo.material.opacity = 0.22 + (Math.sin(t) + 1) * 0.1;
+    }
+  }
 
   for (const p of planetPivots) p.pivot.rotation.y += dt * p.speed;
   for (const m of moons) m.pivot.rotation.y += dt * m.speed;
@@ -4653,6 +4846,7 @@ const tour = (function () {
 const _origPickObject = pickObject;
 pickObject = function (obj) {
   if (tour.active && !tour.suppressExit) tour.exit();
+  if (typeof exitGalaxyMode === "function") exitGalaxyMode();
   return _origPickObject(obj);
 };
 
