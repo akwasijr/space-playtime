@@ -2479,27 +2479,32 @@ function enterIssMode() {
   camTween.active = false;
   controls.enabled = false;
   earthOrbital.visible = true;
+  // Slow the ISS orbit way down so the view doesn't whip around Earth
+  if (issSatRef._origSpeed == null) issSatRef._origSpeed = issSatRef.speed;
+  issSatRef.speed = 0.06;
   issMode = true;
-  const ids = ["iss-hud", "iss-exit", "iss-astronaut", "iss-fact", "iss-photo"];
-  for (const id of ids) {
+  for (const id of ["iss-panel", "iss-flash", "iss-toast"]) {
     const el = document.getElementById(id);
-    if (el) el.hidden = false;
+    if (el && id === "iss-panel") el.hidden = false;
   }
+  const panel = document.getElementById("iss-panel");
+  if (panel) panel.hidden = false;
   document.body.classList.add("iss-mode");
   startIssAnimations();
-  showCaption("Looking out from the International Space Station.");
 }
 
 function exitIssMode() {
   if (!issMode) return;
   issMode = false;
-  const ids = ["iss-hud", "iss-exit", "iss-astronaut", "iss-fact", "iss-photo", "iss-flash", "iss-toast"];
-  for (const id of ids) {
+  for (const id of ["iss-panel", "iss-flash", "iss-toast"]) {
     const el = document.getElementById(id);
     if (el) el.hidden = true;
   }
   document.body.classList.remove("iss-mode");
   stopIssAnimations();
+  if (issSatRef && issSatRef._origSpeed != null) {
+    issSatRef.speed = issSatRef._origSpeed;
+  }
   const earthPos = new THREE.Vector3();
   earth.getWorldPosition(earthPos);
   const back = new THREE.Vector3(0, 6, 18).add(earthPos);
@@ -2511,7 +2516,6 @@ function exitIssMode() {
   camTween.dur = 1.0;
   camTween.active = true;
   camTween.followObj = null;
-  showCaption("Back to space.");
 }
 
 // --- caption + state ---

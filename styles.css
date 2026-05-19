@@ -420,160 +420,154 @@ body.pointing { cursor: pointer; }
 .launch-btn[hidden] { display: none; }
 
 /* ================ Astronaut / ISS view ================ */
-/* HUD strip of three tiny data cards across the top */
-.iss-hud {
+/* Side panel pinned to the right (becomes a bottom sheet on mobile) */
+.iss-panel {
   position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  pointer-events: none;
-  z-index: 8;
-  animation: issHudIn 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
-}
-.iss-hud-card {
-  background: rgba(8, 12, 22, 0.7);
-  border: 0;
-  border-radius: 14px;
-  padding: 9px 14px;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: min(320px, calc(100vw - 36px));
+  background: rgba(8, 10, 20, 0.78);
   color: #f3f6ff;
-  font: inherit;
-  text-align: center;
-  min-width: 96px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 0;
+  border-radius: 18px;
+  padding: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  animation: issPanelIn 380ms cubic-bezier(0.22, 1.1, 0.36, 1) both;
 }
-.iss-hud-label {
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+.iss-panel[hidden] { display: none; }
+@keyframes issPanelIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.iss-panel-head {
+  padding: 20px 22px 16px;
+}
+.iss-panel-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(220, 230, 250, 0.55);
-  margin-bottom: 2px;
+  color: #7adfff;
+  margin-bottom: 4px;
 }
-.iss-hud-row {
+.iss-panel-head h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.iss-panel-body {
+  flex: 1;
+  padding: 0 22px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Live readouts list */
+.iss-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.iss-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+}
+.iss-stat + .iss-stat { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.iss-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(220, 230, 250, 0.7);
+}
+.iss-stat-row {
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 5px;
 }
-.iss-hud-val {
-  font-size: 18px;
+.iss-stat-val {
+  font-size: 20px;
   font-weight: 700;
-  color: #ffffff;
   font-variant-numeric: tabular-nums;
-  transition: color 200ms ease;
+  transition: color 220ms ease;
 }
-.iss-hud-unit {
-  font-size: 11px;
+.iss-stat-unit {
+  font-size: 12px;
   font-weight: 500;
   color: rgba(220, 230, 250, 0.55);
 }
 #iss-speed { color: #7adfff; }
 #iss-alt   { color: #ffd97a; }
 #iss-sunrises { color: #ffb068; }
-.iss-hud[hidden] { display: none; }
-@keyframes issHudIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
 
-/* Floating astronaut */
-.iss-astronaut {
-  position: fixed;
-  left: 4%;
-  bottom: 15%;
-  z-index: 7;
-  pointer-events: none;
-  animation: issAstroIn 500ms cubic-bezier(0.22, 1.1, 0.36, 1) 240ms both,
-             issFloat 5s ease-in-out 740ms infinite;
-  transform-origin: center;
-}
-.iss-astronaut svg { display: block; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)); }
-.iss-astronaut[hidden] { display: none; }
-.iss-arm-wave { transform-origin: 30px 56px; animation: issWave 2.2s ease-in-out infinite; }
-@keyframes issAstroIn {
-  from { opacity: 0; transform: translateX(-30px) rotate(-8deg); }
-  to   { opacity: 1; transform: translateX(0) rotate(0); }
-}
-@keyframes issFloat {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50%      { transform: translateY(-14px) rotate(3deg); }
-}
-@keyframes issWave {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(-18deg); }
-}
-
-/* Fun fact ticker */
-.iss-fact {
-  position: fixed;
-  bottom: 88px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: min(560px, calc(100vw - 32px));
-  padding: 10px 18px;
-  background: rgba(8, 12, 22, 0.75);
+/* Fact card */
+.iss-fact-card {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
   border: 0;
-  border-radius: 14px;
-  color: #f3f6ff;
-  font: inherit;
-  font-size: 13.5px;
-  line-height: 1.4;
-  text-align: center;
-  z-index: 8;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  animation: issFactIn 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 320ms both;
+  border-radius: 12px;
   transition: opacity 320ms ease, transform 320ms ease;
 }
-.iss-fact[hidden] { display: none; }
-.iss-fact.is-fading { opacity: 0; transform: translateX(-50%) translateY(4px); }
+.iss-fact-card.is-fading { opacity: 0; transform: translateY(4px); }
 .iss-fact-tag {
-  display: inline-block;
   font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffd97a;
-  margin-right: 8px;
+  margin-bottom: 6px;
 }
-.iss-fact-text { color: rgba(243, 246, 255, 0.95); }
-@keyframes issFactIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+.iss-fact-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(243, 246, 255, 0.92);
 }
 
-/* Take a photo */
-.iss-photo {
-  position: fixed;
-  right: 22px;
-  bottom: 28px;
-  width: auto;
+/* Action buttons */
+.iss-panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+.iss-action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: rgba(20, 26, 40, 0.78);
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.06);
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
   color: #f3f6ff;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  z-index: 9;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: transform 120ms ease, background 120ms ease;
-  animation: issBtnIn 420ms cubic-bezier(0.22, 1.1, 0.36, 1) 400ms both;
+  min-height: 44px;
+  transition: background 140ms ease, transform 120ms ease;
 }
-.iss-photo:hover  { background: rgba(36, 44, 64, 0.88); transform: translateY(-1px); }
-.iss-photo:active { transform: translateY(0); background: rgba(14, 18, 28, 0.88); }
-.iss-photo:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.iss-photo[hidden] { display: none; }
-@keyframes issBtnIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.iss-action:hover  { background: rgba(255, 255, 255, 0.12); }
+.iss-action:active { transform: scale(0.98); }
+.iss-action:focus-visible { outline: 2px solid #7adfff; outline-offset: 2px; }
+.iss-action-primary {
+  background: #ffc04d;
+  color: #1a0f00;
+}
+.iss-action-primary:hover { background: #ffcd6b; }
+.iss-action-primary:focus-visible { outline: 2px solid #fff; }
 
 /* Flash overlay when a photo is taken */
 .iss-flash {
@@ -596,10 +590,10 @@ body.pointing { cursor: pointer; }
 .iss-toast {
   position: fixed;
   left: 50%;
-  bottom: 90px;
+  bottom: 32px;
   transform: translateX(-50%) translateY(20px);
-  padding: 9px 16px;
-  background: rgba(46, 122, 77, 0.95);
+  padding: 9px 18px;
+  background: rgba(46, 122, 77, 0.96);
   color: #ffffff;
   font: inherit;
   font-size: 13px;
@@ -616,57 +610,29 @@ body.pointing { cursor: pointer; }
 }
 .iss-toast[hidden] { display: none; }
 
-/* Exit button: no border */
-.iss-exit {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: rgba(20, 26, 40, 0.78);
-  border: 0;
-  border-radius: 999px;
-  color: #f3f6ff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 9;
-  transition: transform 120ms ease, background 120ms ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.iss-exit:hover  { transform: translateX(-50%) translateY(-1px); background: rgba(36, 44, 64, 0.88); }
-.iss-exit:active { transform: translateX(-50%) translateY(0);    background: rgba(14, 18, 28, 0.88); }
-.iss-exit:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.iss-exit[hidden] { display: none; }
-
-/* Cupola-window vignette so it feels like looking through a porthole */
-body.iss-mode::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
-  z-index: 6;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .iss-astronaut, .iss-arm-wave, .iss-flash.is-on { animation: none !important; }
-}
-
 @media (max-width: 760px) {
-  .iss-hud { top: 8px; gap: 5px; }
-  .iss-hud-card { min-width: 80px; padding: 7px 10px; border-radius: 11px; }
-  .iss-hud-label { font-size: 9.5px; }
-  .iss-hud-val { font-size: 16px; }
-  .iss-astronaut { left: 2%; bottom: 18%; transform: scale(0.78); transform-origin: bottom left; }
-  .iss-fact { bottom: 84px; font-size: 12.5px; padding: 9px 14px; }
-  .iss-photo { right: 14px; bottom: 22px; padding: 9px 14px; font-size: 12.5px; }
-  .iss-exit  { bottom: 22px; padding: 9px 14px; font-size: 12.5px; }
+  .iss-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 62vh;
+    border-radius: 18px 18px 0 0;
+    background: #0c1020;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    animation: issPanelInMobile 320ms cubic-bezier(0.22, 1.1, 0.36, 1) both;
+  }
+  @keyframes issPanelInMobile {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .iss-panel-head { padding: 16px 18px 12px; }
+  .iss-panel-head h2 { font-size: 19px; }
+  .iss-panel-body { padding: 0 18px 18px; gap: 14px; }
+  .iss-stat-val { font-size: 18px; }
+  .iss-action { font-size: 13.5px; padding: 12px 16px; }
 }
 
 /* Hide chrome that doesn't make sense from inside the station */
@@ -2408,17 +2374,12 @@ body:not(:has(.info-panel:not([hidden]))) .tour-bar {
   .quiz-q { font-size: 17px; }
   .quiz-btn { padding: 12px 22px; min-height: 46px; }
 
-  /* Galaxy / ISS / launch / tour buttons sit lower so they don't overlap minimap */
+  /* Galaxy / launch / tour buttons sit lower so they don't overlap minimap */
   .launch-btn,
-  .iss-exit,
   .galaxy-learn { bottom: 18px; font-size: 12.5px; padding: 10px 16px; }
 
   /* Zoom controls hidden on touch screens (pinch-to-zoom replaces them) */
   .zoom-controls { display: none; }
-
-  /* ISS HUD smaller text on mobile */
-  .iss-hud { font-size: 12px; padding: 7px 12px; top: 12px; }
-  .iss-hud-sub { font-size: 10.5px; }
 
   /* Tour bar already moves to bottom centre via existing rule */
 }
@@ -2439,7 +2400,6 @@ body:not(:has(.info-panel:not([hidden]))) .tour-bar {
   .hot,
   .quiz-choice,
   .top-btn,
-  .iss-exit,
   .launch-btn,
   .galaxy-learn,
   .info-close,
